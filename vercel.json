@@ -1,0 +1,18 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    { "path": "/api/cron/exchange-rates", "schedule": "0 6 * * *" },
+    { "path": "/api/cron/abandoned-carts", "schedule": "0 */2 * * *" },
+    { "path": "/api/cron/dropshipping-sync", "schedule": "0 */6 * * *" }
+  ],
+  "headers": [
+    {
+      "source": "/sitemap.xml",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400" }]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "nav": {
+    "shop": "खरीदारी",
+    "categories": "श्रेणियाँ",
+    "deals": "ऑफर",
+    "blog": "ब्लॉग",
+    "account": "खाता",
+    "cart": "कार्ट",
+    "wishlist": "विशलिस्ट",
+    "login": "लॉग इन",
+    "signup": "साइन अप",
+    "logout": "लॉग आउट",
+    "search_placeholder": "उत्पाद, ब्रांड, ऑफर खोजें…"
+  },
+  "home": {
+    "hero_title": "प्रीमियम उत्पाद, तेज़ डिलीवरी",
+    "hero_subtitle": "दुनिया के सबसे लोकप्रिय ब्रांड्स पर भरोसे के साथ खरीदारी करें।",
+    "shop_now": "अभी खरीदें",
+    "trending": "ट्रेंडिंग",
+    "new_arrivals": "नए आगमन",
+    "best_sellers": "बेस्ट सेलर",
+    "flash_deals": "फ्लैश डील्स",
+    "featured": "चयनित उत्पाद",
+    "categories": "श्रेणी से खरीदें",
+    "testimonials": "ग्राहकों को पसंद आया",
+    "newsletter_title": "पहले ऑर्डर पर 10% छूट",
+    "newsletter_subtitle": "नई लॉन्च और डील्स के लिए 50,000+ ग्राहकों से जुड़ें।",
+    "newsletter_cta": "सब्सक्राइब"
+  },
+  "product": {
+    "add_to_cart": "कार्ट में जोड़ें",
+    "buy_now": "अभी खरीदें",
+    "out_of_stock": "स्टॉक में नहीं",
+    "in_stock": "स्टॉक में",
+    "low_stock": "केवल {count} बचे",
+    "ships_in": "{days} दिनों में डिलीवरी",
+    "specifications": "विशिष्टताएँ",
+    "reviews": "समीक्षाएँ",
+    "faq": "अक्सर पूछे जाने वाले प्रश्न",
+    "related": "आपको ये भी पसंद आ सकते हैं",
+    "frequently_bought": "अक्सर एक साथ खरीदे जाने वाले",
+    "share": "साझा करें"
+  },
+  "cart": {
+    "title": "आपका कार्ट",
+    "empty": "आपका कार्ट खाली है।",
+    "continue_shopping": "खरीदारी जारी रखें",
+    "subtotal": "उप-योग",
+    "shipping": "शिपिंग",
+    "tax": "कर",
+    "total": "कुल",
+    "checkout": "चेकआउट",
+    "apply": "लागू करें",
+    "coupon_placeholder": "कूपन कोड"
+  },
+  "checkout": {
+    "title": "चेकआउट",
+    "contact": "संपर्क जानकारी",
+    "shipping_address": "शिपिंग पता",
+    "billing_address": "बिलिंग पता",
+    "billing_same": "शिपिंग पते के समान",
+    "payment": "भुगतान",
+    "place_order": "ऑर्डर दें"
+  },
+  "account": {
+    "overview": "अवलोकन",
+    "orders": "ऑर्डर",
+    "addresses": "पते",
+    "wishlist": "विशलिस्ट",
+    "settings": "सेटिंग्स",
+    "loyalty": "रिवॉर्ड्स",
+    "referrals": "रेफरल"
+  },
+  "errors": {
+    "generic": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।",
+    "auth_required": "जारी रखने के लिए लॉग इन करें।",
+    "out_of_stock": "वस्तु स्टॉक में नहीं है।"
+  },
+  "footer": {
+    "company": "कंपनी",
+    "support": "सहायता",
+    "legal": "कानूनी",
+    "follow": "फ़ॉलो करें",
+    "about": "हमारे बारे में",
+    "contact": "संपर्क",
+    "careers": "करियर",
+    "privacy": "गोपनीयता",
+    "terms": "सेवा की शर्तें",
+    "returns": "रिटर्न",
+    "shipping_info": "शिपिंग",
+    "track": "ऑर्डर ट्रैक करें",
+    "faq": "FAQ"
+  }
+}
