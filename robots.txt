@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /cart.html
+Disallow: /checkout.html
+Disallow: /thank-you.html
+Disallow: /wishlist.html
+
+Sitemap: https://sonusharmafiles.github.io/ecommerce/sitemap.xml

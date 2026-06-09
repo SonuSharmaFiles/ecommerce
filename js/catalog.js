@@ -1,4 +1,4 @@
-// Catalog: search, filter, sort
+// Catalog: search, filter, sort, paginate
 document.addEventListener("DOMContentLoaded", async () => {
   const grid = document.getElementById("catalog-grid");
   const sidebar = document.getElementById("filter-panel");
@@ -8,12 +8,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   let all = [];
   try {
     all = await loadProducts();
-    window._productsCache = Promise.resolve(all);
-  } catch (e) {
+  } catch {
     grid.innerHTML = `<p class="text-muted">Could not load products.</p>`;
     return;
   }
 
+  const PER_PAGE = 8;
   const params = new URLSearchParams(location.search);
   const state = {
     q: params.get("q") || "",
@@ -22,9 +22,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     minPrice: Number(params.get("min")) || null,
     maxPrice: Number(params.get("max")) || null,
     sort: params.get("sort") || "featured",
+    page: Math.max(1, Number(params.get("page")) || 1),
   };
 
-  // Build filter UI
   const cats = [...new Set(all.map((p) => p.category))];
   const brands = [...new Set(all.map((p) => p.brand))];
   const prices = all.map((p) => p.price);
@@ -55,9 +55,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         <span>–</span>
         <input type="number" id="price-max" placeholder="${priceMax}" value="${state.maxPrice ?? ""}" />
       </div>
-      <button class="btn btn-outline" style="margin-top:12px;padding:6px 12px;font-size:13px" id="apply-price">Apply</button>
+      <button class="btn btn-outline btn-sm" style="margin-top:12px" id="apply-price">Apply</button>
     </div>
-    <button class="btn btn-ghost" id="clear-filters" style="padding:6px 12px;font-size:13px">Clear all</button>
+    <button class="btn btn-ghost btn-sm" id="clear-filters">Clear all</button>
   `;
 
   toolbar.innerHTML = `
@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     </select>
   `;
 
-  function render() {
+  function filtered() {
     let list = all.slice();
     if (state.q) {
       const q = state.q.toLowerCase();
@@ -89,7 +89,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (state.brands.size > 0) list = list.filter((p) => state.brands.has(p.brand));
     if (state.minPrice != null) list = list.filter((p) => p.price >= state.minPrice);
     if (state.maxPrice != null) list = list.filter((p) => p.price <= state.maxPrice);
-
     switch (state.sort) {
       case "price_asc": list.sort((a, b) => a.price - b.price); break;
       case "price_desc": list.sort((a, b) => b.price - a.price); break;
@@ -97,11 +96,38 @@ document.addEventListener("DOMContentLoaded", async () => {
       case "newest": list.sort((a, b) => Number(b.badges?.includes("new")) - Number(a.badges?.includes("new"))); break;
       default: list.sort((a, b) => Number(b.badges?.includes("featured")) - Number(a.badges?.includes("featured")));
     }
+    return list;
+  }
 
-    grid.innerHTML = list.length
-      ? list.map(productCardHTML).join("")
-      : `<div class="empty-state" style="grid-column:1/-1"><h2>No results</h2><p>Try removing some filters.</p></div>`;
-    document.getElementById("catalog-count").textContent = `${list.length} ${list.length === 1 ? "product" : "products"}`;
+  function render() {
+    const list = filtered();
+    const totalPages = Math.max(1, Math.ceil(list.length / PER_PAGE));
+    if (state.page > totalPages) state.page = totalPages;
+    const start = (state.page - 1) * PER_PAGE;
+    const slice = list.slice(start, start + PER_PAGE);
+
+    grid.innerHTML = slice.length
+      ? slice.map(productCardHTML).join("")
+      : `<div class="empty-state" style="grid-column:1/-1">
+           <h2>No results</h2>
+           <p>Try removing some filters or searching for something else.</p>
+         </div>`;
+    document.getElementById("catalog-count").textContent =
+      `${list.length} ${list.length === 1 ? "product" : "products"}`;
+
+    // Pagination
+    const pag = document.getElementById("pagination");
+    if (totalPages > 1) {
+      const pages = [];
+      pages.push(`<button data-page="${state.page - 1}" ${state.page === 1 ? "disabled" : ""}>‹ Prev</button>`);
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(`<button class="${i === state.page ? "active" : ""}" data-page="${i}">${i}</button>`);
+      }
+      pages.push(`<button data-page="${state.page + 1}" ${state.page === totalPages ? "disabled" : ""}>Next ›</button>`);
+      pag.innerHTML = pages.join("");
+    } else {
+      pag.innerHTML = "";
+    }
   }
 
   function updateUrl() {
@@ -112,10 +138,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (state.minPrice != null) p.set("min", state.minPrice);
     if (state.maxPrice != null) p.set("max", state.maxPrice);
     if (state.sort !== "featured") p.set("sort", state.sort);
-    history.replaceState(null, "", "?" + p.toString());
+    if (state.page !== 1) p.set("page", state.page);
+    const q = p.toString();
+    history.replaceState(null, "", q ? "?" + q : location.pathname);
   }
 
-  // Wire events
   sidebar.addEventListener("change", (e) => {
     const t = e.target;
     if (t.matches("[data-filter=category]")) {
@@ -123,6 +150,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else if (t.matches("[data-filter=brand]")) {
       t.checked ? state.brands.add(t.value) : state.brands.delete(t.value);
     }
+    state.page = 1;
     render(); updateUrl();
   });
   sidebar.querySelector("#apply-price").addEventListener("click", () => {
@@ -130,6 +158,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const max = sidebar.querySelector("#price-max").value;
     state.minPrice = min === "" ? null : Number(min);
     state.maxPrice = max === "" ? null : Number(max);
+    state.page = 1;
     render(); updateUrl();
   });
   sidebar.querySelector("#clear-filters").addEventListener("click", () => {
@@ -137,13 +166,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   toolbar.querySelector("#catalog-search").addEventListener("input", (e) => {
-    state.q = e.target.value;
-    render(); updateUrl();
+    state.q = e.target.value; state.page = 1; render(); updateUrl();
   });
   toolbar.querySelector("#catalog-sort").addEventListener("change", (e) => {
-    state.sort = e.target.value;
-    render(); updateUrl();
+    state.sort = e.target.value; state.page = 1; render(); updateUrl();
   });
+  document.getElementById("pagination").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-page]");
+    if (!btn || btn.disabled) return;
+    state.page = Number(btn.dataset.page);
+    render(); updateUrl();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  // Pre-fill search from header search if present
+  const headerQ = new URLSearchParams(location.search).get("q");
+  if (headerQ && !state.q) {
+    state.q = headerQ;
+    toolbar.querySelector("#catalog-search").value = headerQ;
+  }
 
   render();
 });

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/</loc><priority>1.0</priority><changefreq>daily</changefreq></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/products.html</loc><priority>0.9</priority><changefreq>daily</changefreq></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/about.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/contact.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/faq.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/shipping.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/returns.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/privacy.html</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/terms.html</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/track-order.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/product.html?id=wireless-earbuds-pro</loc><priority>0.7</priority></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/product.html?id=studio-headphones-x1</loc><priority>0.7</priority></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/product.html?id=portable-speaker-mini</loc><priority>0.7</priority></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/product.html?id=smart-led-strip-32ft</loc><priority>0.7</priority></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/product.html?id=smart-bulb-pack-4</loc><priority>0.7</priority></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/product.html?id=video-doorbell-pro</loc><priority>0.7</priority></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/product.html?id=fitness-tracker-active</loc><priority>0.7</priority></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/product.html?id=smartwatch-series-7</loc><priority>0.7</priority></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/product.html?id=noise-isolating-buds</loc><priority>0.7</priority></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/product.html?id=smart-plug-bundle</loc><priority>0.7</priority></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/product.html?id=outdoor-bluetooth-speaker</loc><priority>0.7</priority></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/product.html?id=kids-smart-watch</loc><priority>0.7</priority></url>
+</urlset>

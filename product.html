@@ -4,29 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Product — ShopFlow</title>
+  <meta name="description" content="Premium product detail." />
+  <meta name="theme-color" content="#0f172a" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230f172a'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  <header class="site-header">
-    <div class="container nav">
-      <a href="index.html" class="brand"><span class="brand-mark"></span> ShopFlow</a>
-      <nav class="nav-links" aria-label="Primary">
-        <a href="index.html">Home</a>
-        <a href="products.html">Shop</a>
-        <a href="products.html?sort=newest">New</a>
-        <a href="about.html">About</a>
-        <a href="contact.html">Contact</a>
-      </nav>
-      <div class="nav-spacer"></div>
-      <div class="nav-actions">
-        <a class="icon-btn" href="cart.html" aria-label="Cart">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-          <span class="cart-count" hidden>0</span>
-        </a>
-      </div>
-    </div>
-  </header>
+  <div id="layout-header"></div>
 
   <main class="container">
     <div class="breadcrumbs" id="crumbs"></div>
@@ -35,21 +19,17 @@
     </div>
 
     <section class="section" style="padding-top:40px">
-      <div class="section-head">
-        <h2 class="section-title">You might also like</h2>
-      </div>
+      <div class="section-head"><h2 class="section-title">You might also like</h2></div>
       <div class="product-grid" id="related-grid"></div>
+    </section>
+
+    <section class="section" id="detail-recent-section" style="padding-top:0">
+      <div class="section-head"><h2 class="section-title">Recently viewed</h2></div>
+      <div class="product-grid" id="detail-recent-grid"></div>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <div class="footer-bottom">
-        <span>© <span data-year></span> ShopFlow. All rights reserved.</span>
-      </div>
-    </div>
-  </footer>
-
+  <div id="layout-footer"></div>
   <script src="js/app.js"></script>
   <script src="js/detail.js"></script>
 </body>
