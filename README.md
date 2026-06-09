@@ -1,35 +1,41 @@
-# ShopFlow
+# ShopFlow — Static storefront
 
-Enterprise-grade dropshipping ecommerce platform — a Shopify alternative.
-Built with Next.js 15, TypeScript, Supabase, Stripe, PayPal, Resend, and Claude AI.
+A simple, modern ecommerce storefront built with vanilla **HTML, CSS, and JavaScript**.
+No framework, no build step, no backend — runs on GitHub Pages or any static host.
 
-## Highlights
+## Pages
 
-- **Customer storefront** — homepage, search, catalog, product detail with variants & reviews, persistent cart, one-page checkout, account area, wishlist, blog
-- **Admin dashboard** — KPIs with charts, product CRUD, order management, customer CRM, coupons, suppliers, marketing, analytics, AI tools, blog
-- **Payments** — Stripe (Cards/Link/Apple/Google Pay) and PayPal, both with signature-verified webhooks
-- **Dropshipping** — Typed CJ Dropshipping and AutoDS adapters with import, sync, and tracking
-- **AI** — Claude-powered product description, SEO, FAQ, and customer chat
-- **SEO** — dynamic sitemap, robots, JSON-LD (Product, Organization, Breadcrumb, FAQ), Open Graph, canonical URLs
-- **i18n** — English, Hindi, Nepali via next-intl
-- **Multi-currency** — USD/EUR/GBP/AUD/CAD/INR/NPR with live FX from Redis cache
-- **Security** — RBAC with 6 roles, rate limiting, audit log, RLS on all customer data, strict security headers
+- `index.html` — homepage with hero and featured products
+- `products.html` — catalog with search, category, brand, and price filters
+- `product.html` — product detail (loads via `?id=` query param)
+- `cart.html` — shopping cart with quantity controls
+- `checkout.html` — checkout form with order summary
+- `about.html`, `contact.html` — basic informational pages
 
-## Quick start
+## Data
+
+All products live in `data/products.json`. Add, edit, or remove entries there.
+
+## Cart
+
+Lives in `localStorage` under the key `shopflow-cart`. Persists across pages and reloads.
+
+## Run locally
+
+It's plain HTML — open `index.html` in any browser. For best results (so `fetch()` to
+`data/products.json` works without a CORS hiccup), serve from a local HTTP server:
 
 ```bash
-cp .env.example .env.local      # then fill in keys
-npm install
-npm run db:migrate              # applies SQL migrations
-npm run db:seed                 # 12 sample products + admin
-npm run dev
+# Python 3
+python3 -m http.server 8000
+
+# Node
+npx serve .
 ```
 
-Open <http://localhost:3000>.
+Then open <http://localhost:8000>.
 
-## Docs
+## Deploy
 
-- [docs/SETUP.md](docs/SETUP.md) — full setup walkthrough
-- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — Vercel + Supabase + Cloudflare
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — how it's wired together
-- [docs/API.md](docs/API.md) — REST endpoints
+Push to a GitHub repo and enable **Pages** (Settings → Pages → Source: `main` / root).
+Site goes live at `https://<your-user>.github.io/<repo>/`.

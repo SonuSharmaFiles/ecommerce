@@ -1,0 +1,289 @@
+[
+  {
+    "id": "wireless-earbuds-pro",
+    "title": "Wireless Earbuds Pro",
+    "brand": "Auralis",
+    "category": "Audio",
+    "price": 89,
+    "compare_at": 129,
+    "rating": 4.8,
+    "ratings_count": 245,
+    "image": "https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=1200&q=80",
+      "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=1200&q=80",
+      "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=1200&q=80"
+    ],
+    "short": "Premium noise-cancelling wireless earbuds with 30h battery life.",
+    "description": "Crystal-clear sound, adaptive noise cancellation, and a featherweight in-ear fit you can wear all day. Pair instantly with iOS and Android, switch between two devices seamlessly, and recharge to 50% in just 15 minutes.",
+    "specs": [
+      { "name": "Battery", "value": "30 hours (with case)" },
+      { "name": "Bluetooth", "value": "5.3" },
+      { "name": "Driver", "value": "11mm dynamic" },
+      { "name": "Weight", "value": "4.5g per bud" },
+      { "name": "Water resistance", "value": "IPX4" }
+    ],
+    "in_stock": true,
+    "badges": ["best_seller"]
+  },
+  {
+    "id": "studio-headphones-x1",
+    "title": "Studio Headphones X1",
+    "brand": "Auralis",
+    "category": "Audio",
+    "price": 199,
+    "compare_at": 249,
+    "rating": 4.7,
+    "ratings_count": 132,
+    "image": "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=1200&q=80",
+      "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=1200&q=80"
+    ],
+    "short": "Reference-grade over-ear headphones for the studio and home.",
+    "description": "Custom 50mm drivers, plush memory-foam pads, and a wired/wireless hybrid mode. Flat, accurate response that musicians and producers trust.",
+    "specs": [
+      { "name": "Driver", "value": "50mm" },
+      { "name": "Impedance", "value": "32Ω" },
+      { "name": "Battery", "value": "60 hours" },
+      { "name": "Connection", "value": "Wired + Bluetooth 5.3" }
+    ],
+    "in_stock": true,
+    "badges": ["featured"]
+  },
+  {
+    "id": "portable-speaker-mini",
+    "title": "Portable Speaker Mini",
+    "brand": "Auralis",
+    "category": "Audio",
+    "price": 49,
+    "compare_at": null,
+    "rating": 4.5,
+    "ratings_count": 89,
+    "image": "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=1200&q=80"
+    ],
+    "short": "Compact Bluetooth speaker with surprisingly room-filling sound.",
+    "description": "Pocket-friendly, drop-tested, and waterproof. Pair two for true stereo.",
+    "specs": [
+      { "name": "Battery", "value": "12 hours" },
+      { "name": "Water resistance", "value": "IPX7" },
+      { "name": "Weight", "value": "320g" }
+    ],
+    "in_stock": true,
+    "badges": ["new"]
+  },
+  {
+    "id": "smart-led-strip-32ft",
+    "title": "Smart LED Strip 32ft",
+    "brand": "Lumio",
+    "category": "Smart Home",
+    "price": 39,
+    "compare_at": 59,
+    "rating": 4.6,
+    "ratings_count": 412,
+    "image": "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=1200&q=80",
+      "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=1200&q=80"
+    ],
+    "short": "RGB color-changing LED strip with music sync and voice control.",
+    "description": "16 million colors, music-reactive lighting, and integration with Alexa and Google. Comes with adhesive backing and a flexible silicone coating.",
+    "specs": [
+      { "name": "Length", "value": "32 ft (10m)" },
+      { "name": "Colors", "value": "16 million" },
+      { "name": "Voice", "value": "Alexa, Google Assistant" },
+      { "name": "App", "value": "iOS + Android" }
+    ],
+    "in_stock": true,
+    "badges": ["on_sale", "best_seller"]
+  },
+  {
+    "id": "smart-bulb-pack-4",
+    "title": "Smart Bulb Pack (4)",
+    "brand": "Lumio",
+    "category": "Smart Home",
+    "price": 35,
+    "compare_at": null,
+    "rating": 4.4,
+    "ratings_count": 68,
+    "image": "https://images.unsplash.com/photo-1565538810643-b5bdb714032a?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1565538810643-b5bdb714032a?w=1200&q=80"
+    ],
+    "short": "Voice-controlled smart bulbs with 16 million colors.",
+    "description": "A 4-pack of Wi-Fi smart bulbs. Schedule scenes, dim from your phone, and sync with movies and music.",
+    "specs": [
+      { "name": "Wattage", "value": "9W (60W equivalent)" },
+      { "name": "Brightness", "value": "800 lumens" },
+      { "name": "Pack", "value": "4 bulbs" }
+    ],
+    "in_stock": true,
+    "badges": ["new"]
+  },
+  {
+    "id": "video-doorbell-pro",
+    "title": "Video Doorbell Pro",
+    "brand": "Lumio",
+    "category": "Smart Home",
+    "price": 149,
+    "compare_at": null,
+    "rating": 4.7,
+    "ratings_count": 203,
+    "image": "https://images.unsplash.com/photo-1558002038-1055907df827?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1558002038-1055907df827?w=1200&q=80"
+    ],
+    "short": "1080p HD video doorbell with two-way talk and motion alerts.",
+    "description": "See and speak with anyone at your door from your phone. Sharp 1080p HD video, infrared night vision, and clear two-way audio.",
+    "specs": [
+      { "name": "Resolution", "value": "1080p HD" },
+      { "name": "Field of view", "value": "180°" },
+      { "name": "Night vision", "value": "Infrared" },
+      { "name": "Power", "value": "Wired or rechargeable battery" }
+    ],
+    "in_stock": true,
+    "badges": ["featured"]
+  },
+  {
+    "id": "fitness-tracker-active",
+    "title": "Fitness Tracker Active",
+    "brand": "Pulse",
+    "category": "Wearables",
+    "price": 79,
+    "compare_at": null,
+    "rating": 4.5,
+    "ratings_count": 521,
+    "image": "https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=1200&q=80"
+    ],
+    "short": "All-day activity, heart rate, and sleep tracking.",
+    "description": "A lightweight, swim-proof tracker with 7-day battery life. Tracks 20+ sports, monitors heart rate continuously, and gives you a daily readiness score.",
+    "specs": [
+      { "name": "Battery", "value": "7 days" },
+      { "name": "Display", "value": "1.1\" AMOLED" },
+      { "name": "Water resistance", "value": "5 ATM" },
+      { "name": "Sports modes", "value": "20+" }
+    ],
+    "in_stock": true,
+    "badges": ["best_seller"]
+  },
+  {
+    "id": "smartwatch-series-7",
+    "title": "Smartwatch Series 7",
+    "brand": "Pulse",
+    "category": "Wearables",
+    "price": 299,
+    "compare_at": 349,
+    "rating": 4.8,
+    "ratings_count": 312,
+    "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&q=80",
+      "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=1200&q=80"
+    ],
+    "short": "Always-on display, GPS, and 7-day battery.",
+    "description": "Take calls, control music, navigate by GPS, and track every workout from your wrist. Vibrant always-on display you can read in direct sunlight.",
+    "specs": [
+      { "name": "Display", "value": "1.4\" AMOLED, always-on" },
+      { "name": "GPS", "value": "Built-in" },
+      { "name": "Battery", "value": "7 days" },
+      { "name": "Water resistance", "value": "5 ATM" }
+    ],
+    "in_stock": true,
+    "badges": ["featured", "on_sale"]
+  },
+  {
+    "id": "noise-isolating-buds",
+    "title": "Noise-Isolating Buds",
+    "brand": "Auralis",
+    "category": "Audio",
+    "price": 29,
+    "compare_at": null,
+    "rating": 4.3,
+    "ratings_count": 56,
+    "image": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=1200&q=80"
+    ],
+    "short": "Affordable wireless buds with excellent passive isolation.",
+    "description": "Snug silicone tips block out the world. 6 hours per charge, 24 with the case.",
+    "specs": [
+      { "name": "Battery", "value": "6 + 18 hours" },
+      { "name": "Driver", "value": "10mm" }
+    ],
+    "in_stock": true,
+    "badges": ["new"]
+  },
+  {
+    "id": "smart-plug-bundle",
+    "title": "Smart Plug Bundle (4)",
+    "brand": "Lumio",
+    "category": "Smart Home",
+    "price": 39,
+    "compare_at": null,
+    "rating": 4.5,
+    "ratings_count": 102,
+    "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80"
+    ],
+    "short": "Control any outlet with your phone or voice.",
+    "description": "Compact, Wi-Fi connected, no hub required. Schedule on/off, monitor energy use.",
+    "specs": [
+      { "name": "Pack", "value": "4 plugs" },
+      { "name": "Voice", "value": "Alexa, Google" },
+      { "name": "Max load", "value": "10A / 1200W" }
+    ],
+    "in_stock": true,
+    "badges": []
+  },
+  {
+    "id": "outdoor-bluetooth-speaker",
+    "title": "Outdoor Bluetooth Speaker",
+    "brand": "Auralis",
+    "category": "Audio",
+    "price": 119,
+    "compare_at": null,
+    "rating": 4.6,
+    "ratings_count": 178,
+    "image": "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=1200&q=80"
+    ],
+    "short": "Waterproof, dustproof, drop-resistant.",
+    "description": "Big sound for the beach, pool, or campsite. 24-hour battery and a rugged build.",
+    "specs": [
+      { "name": "Battery", "value": "24 hours" },
+      { "name": "Water resistance", "value": "IP67" },
+      { "name": "Output", "value": "20W" }
+    ],
+    "in_stock": true,
+    "badges": ["featured"]
+  },
+  {
+    "id": "kids-smart-watch",
+    "title": "Kids Smart Watch",
+    "brand": "Pulse",
+    "category": "Wearables",
+    "price": 89,
+    "compare_at": null,
+    "rating": 4.4,
+    "ratings_count": 47,
+    "image": "https://images.unsplash.com/photo-1551193430-31cf41ad7af2?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1551193430-31cf41ad7af2?w=1200&q=80"
+    ],
+    "short": "GPS tracker, two-way calling, and educational games.",
+    "description": "Peace of mind for parents and fun for kids. Parental controls in the companion app.",
+    "specs": [
+      { "name": "Battery", "value": "3 days" },
+      { "name": "GPS", "value": "Built-in" },
+      { "name": "Camera", "value": "2MP" }
+    ],
+    "in_stock": false,
+    "badges": ["new"]
+  }
+]
