@@ -1,5 +1,5 @@
 // ShopFlow service worker — cache-first for static assets, network-first for everything else
-const VERSION = "v3";
+const VERSION = "v4";
 const CACHE = `shopflow-${VERSION}`;
 const PRECACHE = [
   "./",

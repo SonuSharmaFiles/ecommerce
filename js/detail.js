@@ -25,6 +25,38 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.title = `${p.title} — ShopFlow`;
   Recent.add(p.id);
 
+  // Dynamic SEO meta — Open Graph / Twitter card per product
+  const imageUrl = (p.images && p.images[0]) || p.image;
+  const ogDesc = (p.short || p.description || "").replace(/<[^>]+>/g, "").slice(0, 160);
+  const setMeta = (sel, attrs) => {
+    let el = document.querySelector(sel);
+    if (!el) {
+      el = document.createElement("meta");
+      Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+      document.head.appendChild(el);
+    } else {
+      el.setAttribute("content", attrs.content);
+    }
+  };
+  setMeta('meta[name="description"]', { name: "description", content: ogDesc });
+  setMeta('meta[property="og:type"]', { property: "og:type", content: "product" });
+  setMeta('meta[property="og:title"]', { property: "og:title", content: `${p.title} — ShopFlow` });
+  setMeta('meta[property="og:description"]', { property: "og:description", content: ogDesc });
+  setMeta('meta[property="og:image"]', { property: "og:image", content: imageUrl });
+  setMeta('meta[property="og:url"]', { property: "og:url", content: location.href });
+  setMeta('meta[name="twitter:card"]', { name: "twitter:card", content: "summary_large_image" });
+  setMeta('meta[name="twitter:title"]', { name: "twitter:title", content: p.title });
+  setMeta('meta[name="twitter:description"]', { name: "twitter:description", content: ogDesc });
+  setMeta('meta[name="twitter:image"]', { name: "twitter:image", content: imageUrl });
+  // Canonical
+  let canon = document.querySelector('link[rel="canonical"]');
+  if (!canon) {
+    canon = document.createElement("link");
+    canon.rel = "canonical";
+    document.head.appendChild(canon);
+  }
+  canon.href = `https://sonusharmafiles.github.io/ecommerce/product.html?id=${p.id}`;
+
   // Add JSON-LD Product schema for SEO (uses effective stats incl. user reviews)
   const initialStats = effectiveStats(p);
   const ldScript = document.createElement("script");

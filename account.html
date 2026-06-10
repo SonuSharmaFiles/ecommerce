@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My account — ShopFlow</title>
+  <meta name="description" content="Your ShopFlow account: rewards, orders, wishlist, and preferences." />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="My account — ShopFlow" />
+  <meta property="og:description" content="Your ShopFlow account: rewards, orders, wishlist, and preferences." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="My account — ShopFlow" />
+  <meta name="twitter:description" content="Your ShopFlow account: rewards, orders, wishlist, and preferences." />
+  <meta name="robots" content="noindex" />
+  <link rel="canonical" href="https://sonusharmafiles.github.io/ecommerce/account.html" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230f172a'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .account-grid { display: grid; grid-template-columns: 240px 1fr; gap: 32px; padding: 24px 0; }
+    @media (max-width: 860px) { .account-grid { grid-template-columns: 1fr; } }
+    .account-nav { display: flex; flex-direction: column; gap: 4px; position: sticky; top: calc(var(--header-h) + 20px); align-self: start; }
+    .account-nav a {
+      padding: 10px 14px; border-radius: 8px; font-size: 14px;
+      color: var(--ink-soft); display: flex; align-items: center; gap: 10px;
+    }
+    .account-nav a:hover, .account-nav a.active { background: var(--accent); color: var(--ink); }
+    .account-card {
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 24px; background: var(--bg); margin-bottom: 16px;
+    }
+    html[data-theme="dark"] .account-card { background: var(--bg-soft); }
+    .account-card h2 { font-size: 18px; margin: 0 0 8px; }
+    .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+    @media (max-width: 720px) { .stat-row { grid-template-columns: repeat(2, 1fr); } }
+    .stat {
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 16px; background: var(--bg-soft);
+    }
+    .stat strong { display: block; font-size: 28px; line-height: 1.2; }
+    .stat span { color: var(--ink-soft); font-size: 12px; }
+    .reward-hero {
+      background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+      border-radius: var(--radius); padding: 28px; color: #78350f;
+      border: 1px solid #fcd34d;
+    }
+    html[data-theme="dark"] .reward-hero {
+      background: linear-gradient(135deg, #422006 0%, #57130c 100%);
+      color: #fef3c7; border-color: #92400e;
+    }
+    .reward-hero h2 { margin: 0 0 4px; color: inherit; font-size: 22px; }
+    .reward-hero .big { font-size: 56px; font-weight: 800; line-height: 1; margin: 8px 0; }
+    .tier-row { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    .tier {
+      flex: 1; min-width: 100px; padding: 10px; border-radius: 8px;
+      background: rgba(255, 255, 255, .5); text-align: center; font-size: 12px;
+      border: 1px solid transparent;
+    }
+    html[data-theme="dark"] .tier { background: rgba(0,0,0,.3); }
+    .tier.active { border-color: #78350f; background: rgba(255,255,255,.85); font-weight: 700; }
+    html[data-theme="dark"] .tier.active { background: rgba(254,243,199,.15); border-color: #fcd34d; }
+    .pref-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .pref-row:last-child { border-bottom: 0; }
+    .pref-row > div { font-size: 14px; }
+    .pref-row > div small { display: block; color: var(--ink-soft); font-size: 12px; margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <div id="layout-header"></div>
+
+  <main id="main" class="container">
+    <div class="breadcrumbs">
+      <a href="index.html">Home</a><span class="sep">/</span><span>Account</span>
+    </div>
+    <h1 style="margin:8px 0 8px;font-size:32px;letter-spacing:-.02em">Hi there 👋</h1>
+    <p class="text-muted" style="margin:0 0 8px">Welcome to your ShopFlow account.</p>
+
+    <div class="account-grid">
+      <nav class="account-nav" aria-label="Account">
+        <a href="#rewards" class="active">⭐ Rewards</a>
+        <a href="#orders">📦 Orders</a>
+        <a href="wishlist.html">♥ Wishlist (<span class="wishlist-count">0</span>)</a>
+        <a href="compare.html">⇆ Compare</a>
+        <a href="cart.html">🛒 Cart</a>
+        <a href="#preferences">⚙ Preferences</a>
+      </nav>
+
+      <div>
+        <section id="rewards" class="reward-hero">
+          <h2>ShopFlow Rewards</h2>
+          <p style="margin:0">Earn 1 point per $1 spent. Redeem at checkout.</p>
+          <div class="big" id="points-display">0</div>
+          <div style="font-size:13px;opacity:.85">points available</div>
+
+          <div class="tier-row" id="tier-row">
+            <div class="tier active">Bronze<br/><small>0+ pts · 1x</small></div>
+            <div class="tier">Silver<br/><small>500+ pts · 1.25x</small></div>
+            <div class="tier">Gold<br/><small>2000+ pts · 1.5x</small></div>
+            <div class="tier">Platinum<br/><small>5000+ pts · 2x</small></div>
+          </div>
+        </section>
+
+        <section id="orders" class="account-card">
+          <h2>Orders</h2>
+          <p class="text-muted" style="margin:0 0 12px">Track any order with your order ID and email.</p>
+          <a class="btn btn-primary" href="track-order.html">Track an order</a>
+        </section>
+
+        <section class="account-card">
+          <h2>Quick stats</h2>
+          <div class="stat-row">
+            <div class="stat"><strong class="cart-count" data-zero-text="0">0</strong><span>In cart</span></div>
+            <div class="stat"><strong class="wishlist-count" data-zero-text="0">0</strong><span>Wishlist items</span></div>
+            <div class="stat"><strong id="saved-count">0</strong><span>Saved for later</span></div>
+          </div>
+        </section>
+
+        <section id="preferences" class="account-card">
+          <h2>Preferences</h2>
+
+          <div class="pref-row">
+            <div>
+              <strong>Theme</strong>
+              <small>Switch between light and dark mode</small>
+            </div>
+            <button class="btn btn-outline btn-sm" id="theme-btn">Toggle</button>
+          </div>
+
+          <div class="pref-row">
+            <div>
+              <strong>Currency</strong>
+              <small>Displayed across the store</small>
+            </div>
+            <select class="input currency-select" style="width:140px" aria-label="Currency"></select>
+          </div>
+
+          <div class="pref-row">
+            <div>
+              <strong>Marketing emails</strong>
+              <small>New drops, sales, restock alerts</small>
+            </div>
+            <button class="btn btn-outline btn-sm" data-marketing>Subscribe</button>
+          </div>
+
+          <div class="pref-row">
+            <div>
+              <strong>Clear local data</strong>
+              <small>Reset cart, wishlist, reviews, and preferences on this device</small>
+            </div>
+            <button class="btn btn-outline btn-sm" id="clear-data" style="color:var(--danger)">Clear</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="layout-footer"></div>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Points (1 per $1 cart subtotal as a teaser figure)
+      const pts = Math.max(Loyalty.get(), Math.floor(Cart.subtotal() * 2));
+      document.getElementById("points-display").textContent = pts.toLocaleString();
+
+      // Highlight current tier
+      const tiers = [0, 500, 2000, 5000];
+      const idx = tiers.findIndex((t, i) => pts < (tiers[i+1] ?? Infinity));
+      document.querySelectorAll("#tier-row .tier").forEach((el, i) => {
+        el.classList.toggle("active", i === idx);
+      });
+
+      // Saved count
+      document.getElementById("saved-count").textContent = Saved.count();
+
+      // Theme button
+      document.getElementById("theme-btn").addEventListener("click", () => {
+        const next = Theme.toggle();
+        toast(next === "dark" ? "Dark mode on" : "Light mode on");
+      });
+
+      // Marketing
+      document.querySelector("[data-marketing]").addEventListener("click", function () {
+        toast("Subscribed. Use code WELCOME10 for 10% off.");
+        this.textContent = "Subscribed ✓";
+        this.disabled = true;
+      });
+
+      // Clear data
+      document.getElementById("clear-data").addEventListener("click", () => {
+        if (!confirm("Clear all local data? This resets your cart, wishlist, reviews, and preferences.")) return;
+        ["shopflow-cart", "shopflow-wishlist", "shopflow-saved", "shopflow-compare",
+         "shopflow-recent", "shopflow-promo", "shopflow-reviews", "shopflow-helpful",
+         "shopflow-loyalty-points", "shopflow-promo-bar-dismissed", "shopflow-cookies-ok",
+         "shopflow-browser-id", "shopflow-theme", "shopflow-currency"].forEach((k) => localStorage.removeItem(k));
+        Theme.apply("light");
+        toast("Cleared. Reloading…");
+        setTimeout(() => location.reload(), 800);
+      });
+    });
+  </script>
+</body>
+</html>

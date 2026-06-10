@@ -187,4 +187,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   render();
+
+  // ItemList JSON-LD for SEO — lists every product in the catalog
+  const itemListLd = document.createElement("script");
+  itemListLd.type = "application/ld+json";
+  itemListLd.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "ShopFlow products",
+    itemListElement: all.map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `https://sonusharmafiles.github.io/ecommerce/product.html?id=${p.id}`,
+      name: p.title,
+    })),
+  });
+  document.head.appendChild(itemListLd);
 });

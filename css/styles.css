@@ -607,6 +607,9 @@ input, select, textarea { font: inherit; }
 @media (max-width: 720px) {
   .sticky-cta.active { display: flex; }
   body.sticky-cta-on { padding-bottom: 80px; }
+  /* Lift the compare bar above the sticky add-to-cart on mobile */
+  body.sticky-cta-on .compare-bar { bottom: 88px; }
+  .social-proof { bottom: 90px; max-width: calc(100vw - 32px); }
 }
 
 /* ====== Cart ====== */
