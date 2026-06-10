@@ -42,52 +42,95 @@
   }
   </script>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,72,400;1,72,500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
   <div id="layout-header"></div>
 
   <main id="main">
-    <section class="container hero">
-      <div>
-        <span class="hero-eyebrow"><span class="dot"></span> New drops every week</span>
-        <h1>Premium products,<br/>fast delivery worldwide.</h1>
-        <p>Shop the world's most-loved brands with confidence. Free shipping over $75. Hassle-free returns.</p>
-        <div style="display:flex;gap:12px;flex-wrap:wrap">
-          <a class="btn btn-primary btn-lg" href="products.html">Shop now →</a>
-          <a class="btn btn-outline btn-lg" href="#deals">Today's deals</a>
+    <section class="hero-pro" aria-label="Featured collection">
+      <div class="hero-pro-bg" aria-hidden="true"></div>
+      <div class="container hero-pro-grid">
+        <div class="hero-pro-content">
+          <a href="product.html?id=smart-sleep-ring" class="hero-pro-eyebrow">
+            <span class="pulse"></span>
+            <span>New this week · Smart Sleep Ring</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+
+          <h1 class="hero-pro-title">
+            Premium tech,<br/>
+            <span class="italic">hand-picked.</span>
+          </h1>
+
+          <p class="hero-pro-sub">
+            Curated audio, smart home, and wearables from the world's most thoughtful brands. We test every product so you don't have to.
+          </p>
+
+          <div class="hero-pro-ctas">
+            <a class="btn btn-primary btn-lg hero-pro-cta" href="products.html">
+              Shop the collection
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <a class="hero-pro-secondary" href="about.html">
+              <span>How we curate</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          </div>
+
+          <div class="hero-pro-press">
+            <span class="press-label">As featured in</span>
+            <div class="press-logos">
+              <span>WIRED</span>
+              <span>The Verge</span>
+              <span>FORBES</span>
+              <span>GQ</span>
+              <span>Engadget</span>
+            </div>
+          </div>
         </div>
-        <div class="hero-stats">
-          <div class="hero-stat"><strong>50k+</strong><span>Customers</span></div>
-          <div class="hero-stat"><strong>4.8</strong><span>Avg rating</span></div>
-          <div class="hero-stat"><strong>200+</strong><span>Brands</span></div>
+
+        <div class="hero-pro-visual">
+          <div class="hero-pro-shape" aria-hidden="true"></div>
+          <a href="product.html?id=studio-headphones-x1" class="hero-pro-product">
+            <img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=1200&q=80" alt="Studio Headphones X1" loading="eager" fetchpriority="high"/>
+            <span class="hero-pro-pill">★ 4.7 · Editor's pick</span>
+          </a>
+          <a href="product.html?id=studio-headphones-x1" class="hero-pro-tag">
+            <div>
+              <strong>Studio Headphones X1</strong>
+              <div class="meta">Auralis · $199 · Save $50</div>
+            </div>
+            <span class="hero-pro-tag-cta">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </span>
+          </a>
         </div>
-      </div>
-      <div class="hero-image">
-        <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=900&q=80" alt="Featured collection"/>
       </div>
     </section>
 
-    <section class="container">
-      <div class="trust">
-        <div class="trust-item">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-          <div><strong>Free shipping</strong><span>On orders over $75</span></div>
-        </div>
-        <div class="trust-item">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <div><strong>Secure checkout</strong><span>SSL encrypted</span></div>
-        </div>
-        <div class="trust-item">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
-          <div><strong>30-day returns</strong><span>Hassle-free</span></div>
-        </div>
-        <div class="trust-item">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-4h3v2zM3 19a2 2 0 0 0 2 2h1v-4H3v2z"/></svg>
-          <div><strong>24/7 support</strong><span>Real humans</span></div>
-        </div>
+    <div class="hero-marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>FREE SHIPPING OVER $75</span><span class="m-dot">●</span>
+        <span>30-DAY RETURNS</span><span class="m-dot">●</span>
+        <span>4.8 ★ CUSTOMER RATING</span><span class="m-dot">●</span>
+        <span>50,000+ HAPPY CUSTOMERS</span><span class="m-dot">●</span>
+        <span>SECURE CHECKOUT</span><span class="m-dot">●</span>
+        <span>WORLDWIDE DELIVERY</span><span class="m-dot">●</span>
+        <span>FREE GIFT WRAP</span><span class="m-dot">●</span>
+        <!-- duplicated for seamless loop -->
+        <span>FREE SHIPPING OVER $75</span><span class="m-dot">●</span>
+        <span>30-DAY RETURNS</span><span class="m-dot">●</span>
+        <span>4.8 ★ CUSTOMER RATING</span><span class="m-dot">●</span>
+        <span>50,000+ HAPPY CUSTOMERS</span><span class="m-dot">●</span>
+        <span>SECURE CHECKOUT</span><span class="m-dot">●</span>
+        <span>WORLDWIDE DELIVERY</span><span class="m-dot">●</span>
+        <span>FREE GIFT WRAP</span><span class="m-dot">●</span>
       </div>
-    </section>
+    </div>
 
     <section class="container section">
       <div class="section-head">
