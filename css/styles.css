@@ -1827,9 +1827,11 @@ html[data-theme="dark"] .hero-pro-tag {
   .marquee-track span { font-size: 11px; }
 }
 
-/* Backgrounds that hard-coded #fff and aren't already overridden */
-html[data-theme="dark"] .pagination button,
-html[data-theme="dark"] .variant-options button,
+/* Backgrounds that hard-coded #fff and aren't already overridden.
+   Using :not(.active) on pagination/variant buttons so the dark bg
+   override doesn't also nuke the .active state styling.            */
+html[data-theme="dark"] .pagination button:not(.active),
+html[data-theme="dark"] .variant-options button:not(.active),
 html[data-theme="dark"] .search-box,
 html[data-theme="dark"] .category-card .label,
 html[data-theme="dark"] .cookie-banner,
@@ -1839,13 +1841,94 @@ html[data-theme="dark"] .delivery-estimate,
 html[data-theme="dark"] .free-ship-bar {
   background: var(--bg-soft);
 }
+/* Make absolutely sure the active variant/pagination buttons keep
+   their inverted "selected" look in dark mode.                      */
+html[data-theme="dark"] .variant-options button.active,
+html[data-theme="dark"] .pagination button.active {
+  background: var(--ink);
+  color: var(--primary-foreground);
+  border-color: var(--ink);
+}
 html[data-theme="dark"] .newsletter-card {
   background: linear-gradient(135deg, var(--bg-soft), var(--bg));
 }
+/* compare-check stays light-on-image; text MUST be a fixed dark colour
+   because var(--ink) goes light in dark mode and would disappear. */
 html[data-theme="dark"] .compare-check {
   background: rgba(255, 255, 255, .92);
-  color: var(--ink);
+  color: #0f172a;
 }
+html[data-theme="dark"] .compare-check.active {
+  background: #0f172a;
+  color: #fff;
+}
+
+/* Unclassed text inputs that the form rules don't cover */
+html[data-theme="dark"] .qty-stepper input,
+html[data-theme="dark"] .qty-stepper {
+  background: var(--bg-soft);
+  color: var(--ink);
+  border-color: var(--border);
+}
+html[data-theme="dark"] .price-range input,
+html[data-theme="dark"] .promo-input input,
+html[data-theme="dark"] .newsletter-form input,
+html[data-theme="dark"] .nf-search,
+html[data-theme="dark"] .nf-search input,
+html[data-theme="dark"] .reward-hero input,
+html[data-theme="dark"] input[type="search"],
+html[data-theme="dark"] input[type="text"],
+html[data-theme="dark"] input[type="email"],
+html[data-theme="dark"] input[type="number"],
+html[data-theme="dark"] input[type="tel"],
+html[data-theme="dark"] textarea {
+  background: var(--bg-soft);
+  color: var(--ink);
+  border-color: var(--border);
+}
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: var(--muted);
+}
+
+/* nf-search wrapper on the 404 page also has hardcoded #fff */
+html[data-theme="dark"] .nf-search {
+  border-color: var(--border);
+}
+html[data-theme="dark"] .nf-search input {
+  background: transparent;
+}
+html[data-theme="dark"] .nf-floating-tag {
+  background: var(--bg-soft);
+  color: var(--ink);
+  border-color: var(--border);
+}
+
+/* Stock pill — low (amber) needs theme awareness */
+html[data-theme="dark"] .stock-pill.low {
+  background: #422006;
+  color: #fef3c7;
+}
+
+/* Tiny details — focus rings should be visible in dark mode */
+html[data-theme="dark"] .input:focus,
+html[data-theme="dark"] .qty-stepper input:focus {
+  outline-color: var(--ink);
+}
+
+/* Search dropdown active item — already uses var(--accent), but ensure
+   contrast in dark mode (accent is darker) */
+html[data-theme="dark"] .search-result:hover,
+html[data-theme="dark"] .search-result.active {
+  background: var(--accent);
+}
+
+/* Marquee text gets a little brighter in dark mode for legibility */
+html[data-theme="dark"] .marquee-track span { color: var(--ink-soft); }
+html[data-theme="dark"] .hero-marquee { background: var(--bg); }
+
+/* Hero pill on dark mode — bg stays light, text already fixed dark, keep so */
+html[data-theme="dark"] .hero-pro-pill { color: #0f172a; }
 html[data-theme="dark"] .wishlist-btn,
 html[data-theme="dark"] .quick-view-close {
   background: rgba(15, 23, 42, .85);
