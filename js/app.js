@@ -325,6 +325,50 @@ async function loadProducts() {
 function productImage(p) {
   return p.image || (p.images && p.images[0]) || "";
 }
+
+// Inline SVG fallback for broken/missing images — colored block with initials.
+// Used by the global image-error handler so no card ever shows a browser
+// "broken image" icon.
+function placeholderDataUri(label) {
+  const text = (label || "Product").trim() || "Product";
+  const words = text.split(/\s+/).filter(Boolean);
+  const initials = (
+    (words[0]?.[0] ?? "") + (words[1]?.[0] ?? words[0]?.[1] ?? "")
+  ).toUpperCase().slice(0, 2) || "S";
+
+  // Deterministic pleasant hue from the label so each product keeps its color.
+  let hash = 7;
+  for (let i = 0; i < text.length; i++) hash = (hash * 31 + text.charCodeAt(i)) >>> 0;
+  const hue = hash % 360;
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="hsl(${hue},35%,94%)"/>
+        <stop offset="100%" stop-color="hsl(${hue},28%,82%)"/>
+      </linearGradient>
+    </defs>
+    <rect width="600" height="600" fill="url(#g)"/>
+    <g opacity="0.18" fill="none" stroke="hsl(${hue},30%,30%)" stroke-width="3">
+      <circle cx="120" cy="120" r="60"/>
+      <circle cx="480" cy="500" r="80"/>
+      <path d="M380 80 l40 40 l-40 40 l-40 -40 z"/>
+    </g>
+    <text x="300" y="335" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="200" font-weight="800" fill="hsl(${hue},35%,28%)" opacity="0.55" letter-spacing="-6">${initials}</text>
+  </svg>`;
+  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+}
+
+// Global image error handler: catches any <img> that fails to load and swaps
+// it for a nice fallback. Listens in capture phase because the `error` event
+// from an <img> doesn't bubble.
+document.addEventListener("error", (e) => {
+  const img = e.target;
+  if (!img || img.tagName !== "IMG") return;
+  if (img.dataset.fb === "1") return;            // already swapped
+  img.dataset.fb = "1";
+  img.src = placeholderDataUri(img.alt || img.dataset.label || "Product");
+}, true);
 function discountPercent(p) {
   if (!p.compare_at || p.compare_at <= p.price) return 0;
   return Math.round(((p.compare_at - p.price) / p.compare_at) * 100);
