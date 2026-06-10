@@ -366,11 +366,11 @@ input, select, textarea { font: inherit; }
 .price-now { font-weight: 700; font-size: 16px; }
 .price-old { color: var(--muted); text-decoration: line-through; font-size: 12px; margin-left: 6px; }
 .add-btn {
-  border: 1px solid var(--border); background: #fff;
+  border: 1px solid var(--border); background: var(--bg);
   padding: 8px 10px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px;
   font-size: 12px; font-weight: 600; color: var(--ink);
 }
-.add-btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+.add-btn:hover { background: var(--ink); color: var(--primary-foreground); border-color: var(--ink); }
 
 /* ====== Filter sidebar ====== */
 .catalog { display: grid; grid-template-columns: 240px 1fr; gap: 32px; }
@@ -1307,3 +1307,62 @@ html[data-theme="dark"] .loyalty-banner a { color: #fef3c7; }
   transition: top .2s ease;
 }
 .skip-link:focus { top: 16px; }
+
+/* ===================================================================
+   Dark-mode text/background patches.
+   Anywhere using `var(--ink)` background with literal `#fff` text becomes
+   "light-on-light" in dark mode. These rules swap the text to use
+   var(--primary-foreground), which is white in light mode and dark in
+   dark mode — so contrast stays correct in both themes.
+   =================================================================== */
+html[data-theme="dark"] .badge,
+html[data-theme="dark"] .badge.new,
+html[data-theme="dark"] .add-btn:hover,
+html[data-theme="dark"] .pagination button.active,
+html[data-theme="dark"] .variant-options button.active,
+html[data-theme="dark"] .toast,
+html[data-theme="dark"] .icon-badge,
+html[data-theme="dark"] .promo-bar,
+html[data-theme="dark"] .promo-bar .promo-close,
+html[data-theme="dark"] .form-card .step-num,
+html[data-theme="dark"] .review-avatar,
+html[data-theme="dark"] .skip-link,
+html[data-theme="dark"] .cart-row .qty-row button:hover {
+  color: var(--primary-foreground);
+}
+html[data-theme="dark"] .badge.best,
+html[data-theme="dark"] .badge.warning {
+  /* amber badge needs a dark text always */
+  color: #422006;
+}
+
+/* Backgrounds that hard-coded #fff and aren't already overridden */
+html[data-theme="dark"] .pagination button,
+html[data-theme="dark"] .variant-options button,
+html[data-theme="dark"] .search-box,
+html[data-theme="dark"] .category-card .label,
+html[data-theme="dark"] .cookie-banner,
+html[data-theme="dark"] .megamenu-card,
+html[data-theme="dark"] .nf-category,
+html[data-theme="dark"] .delivery-estimate,
+html[data-theme="dark"] .free-ship-bar {
+  background: var(--bg-soft);
+}
+html[data-theme="dark"] .newsletter-card {
+  background: linear-gradient(135deg, var(--bg-soft), var(--bg));
+}
+html[data-theme="dark"] .compare-check {
+  background: rgba(255, 255, 255, .92);
+  color: var(--ink);
+}
+html[data-theme="dark"] .wishlist-btn,
+html[data-theme="dark"] .quick-view-close {
+  background: rgba(15, 23, 42, .85);
+  color: #fff;
+}
+html[data-theme="dark"] .quick-view-img { background: var(--bg); }
+html[data-theme="dark"] .countdown-strip {
+  background: linear-gradient(90deg, rgba(239, 68, 68, .1), transparent);
+  border-color: #571a1a;
+}
+html[data-theme="dark"] .countdown-strip strong { color: #fca5a5; }
