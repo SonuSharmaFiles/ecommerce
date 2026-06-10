@@ -11,6 +11,105 @@ const CURRENCY_KEY = "shopflow-currency";
 const PROMO_BAR_KEY = "shopflow-promo-bar-dismissed";
 const REVIEWS_KEY = "shopflow-reviews";
 const BROWSER_KEY = "shopflow-browser-id";
+const SAVED_KEY = "shopflow-saved";
+const COMPARE_KEY = "shopflow-compare";
+const HELPFUL_KEY = "shopflow-helpful";
+const LOYALTY_KEY = "shopflow-loyalty-points";
+const THEME_KEY = "shopflow-theme";
+
+// ---- Theme (dark mode) ----
+const Theme = {
+  get() {
+    return localStorage.getItem(THEME_KEY)
+      || (window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  },
+  apply(value) {
+    if (value === "dark") document.documentElement.setAttribute("data-theme", "dark");
+    else document.documentElement.removeAttribute("data-theme");
+  },
+  set(value) {
+    localStorage.setItem(THEME_KEY, value);
+    Theme.apply(value);
+  },
+  toggle() {
+    const next = Theme.get() === "dark" ? "light" : "dark";
+    Theme.set(next);
+    return next;
+  },
+};
+// Apply theme as early as possible to avoid flash
+Theme.apply(Theme.get());
+
+// ---- Saved for later ----
+const Saved = {
+  get() {
+    try { return JSON.parse(localStorage.getItem(SAVED_KEY)) || []; }
+    catch { return []; }
+  },
+  set(items) {
+    localStorage.setItem(SAVED_KEY, JSON.stringify(items));
+    document.dispatchEvent(new CustomEvent("saved:changed"));
+  },
+  has(id) { return Saved.get().some((i) => i.id === id); },
+  add(item) {
+    const items = Saved.get().filter((i) => i.id !== item.id);
+    items.push(item);
+    Saved.set(items);
+  },
+  remove(id) { Saved.set(Saved.get().filter((i) => i.id !== id)); },
+  count() { return Saved.get().length; },
+};
+
+// ---- Compare ----
+const Compare = {
+  MAX: 4,
+  get() {
+    try { return JSON.parse(localStorage.getItem(COMPARE_KEY)) || []; }
+    catch { return []; }
+  },
+  set(ids) {
+    localStorage.setItem(COMPARE_KEY, JSON.stringify(ids));
+    document.dispatchEvent(new CustomEvent("compare:changed"));
+  },
+  has(id) { return Compare.get().includes(id); },
+  toggle(id) {
+    const list = Compare.get();
+    if (list.includes(id)) { Compare.set(list.filter((x) => x !== id)); return false; }
+    if (list.length >= Compare.MAX) {
+      toast(`You can only compare up to ${Compare.MAX} products`);
+      return false;
+    }
+    Compare.set([...list, id]);
+    return true;
+  },
+  remove(id) { Compare.set(Compare.get().filter((x) => x !== id)); },
+  clear() { Compare.set([]); },
+};
+
+// ---- Review helpful votes (per browser) ----
+const Helpful = {
+  get() {
+    try { return JSON.parse(localStorage.getItem(HELPFUL_KEY)) || {}; }
+    catch { return {}; }
+  },
+  toggle(reviewId) {
+    const map = Helpful.get();
+    map[reviewId] = !map[reviewId];
+    if (!map[reviewId]) delete map[reviewId];
+    localStorage.setItem(HELPFUL_KEY, JSON.stringify(map));
+    return !!map[reviewId];
+  },
+  voted(reviewId) { return !!Helpful.get()[reviewId]; },
+  countFor(reviewId, baseline = 0) {
+    return baseline + (Helpful.voted(reviewId) ? 1 : 0);
+  },
+};
+
+// ---- Loyalty points (display-only teaser) ----
+const Loyalty = {
+  get() { return Number(localStorage.getItem(LOYALTY_KEY)) || 0; },
+  add(n) { localStorage.setItem(LOYALTY_KEY, String(Math.max(0, Loyalty.get() + n))); },
+};
 
 // ---- Browser identity (stable per browser, used to gate edit/delete) ----
 function getBrowserId() {
@@ -417,15 +516,25 @@ function productCardHTML(p) {
   const inWishlist = Wishlist.has(p.id);
   const stats = effectiveStats(p);
 
+  const inCompare = Compare.has(p.id);
+
   return `
     <article class="product-card" data-product-card="${p.id}">
       <a href="product.html?id=${p.id}" class="product-media">
         <img src="${productImage(p)}" alt="${escapeHtml(p.title)}" loading="lazy" />
         <div class="product-badges">${badges.join("")}</div>
+        <button class="quick-view-btn" data-quick-view="${p.id}" aria-label="Quick view">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Quick view
+        </button>
       </a>
       <button class="wishlist-btn ${inWishlist ? "active" : ""}" data-wishlist="${p.id}" aria-label="Toggle wishlist" title="Wishlist">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       </button>
+      <label class="compare-check ${inCompare ? "active" : ""}" data-compare-label="${p.id}">
+        <input type="checkbox" data-compare="${p.id}" ${inCompare ? "checked" : ""}/>
+        Compare
+      </label>
       <div class="product-body">
         <div class="product-meta">${escapeHtml(p.brand)} · ${escapeHtml(p.category)}</div>
         <a href="product.html?id=${p.id}" class="product-title">${escapeHtml(p.title)}</a>
@@ -501,6 +610,7 @@ function renderLayout() {
     </div>`;
 
   const header = `
+    <a href="#main" class="skip-link">Skip to content</a>
     ${promoBar}
     <header class="site-header">
       <div class="container nav">
@@ -509,13 +619,40 @@ function renderLayout() {
         </button>
         <a href="index.html" class="brand"><span class="brand-mark"></span> ShopFlow</a>
         <nav class="nav-links" aria-label="Primary">
-          ${NAV_LINKS.map((l) => `<a href="${l.href}">${l.label}</a>`).join("")}
+          <a href="index.html">Home</a>
+          <span class="megamenu-wrap" id="megamenu-wrap">
+            <button class="megamenu-trigger" aria-haspopup="true" aria-expanded="false" id="megamenu-trigger">
+              Shop
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="megamenu" id="megamenu" role="menu">
+              <div>
+                <h4>Categories</h4>
+                <div class="megamenu-list" id="megamenu-categories"></div>
+              </div>
+              <div>
+                <h4>Featured</h4>
+                <div class="megamenu-featured" id="megamenu-featured"></div>
+              </div>
+            </div>
+          </span>
+          <a href="products.html?sort=newest">New</a>
+          <a href="compare.html">Compare</a>
+          <a href="about.html">About</a>
+          <a href="contact.html">Contact</a>
         </nav>
-        <form class="header-search" role="search" action="products.html" method="get">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="search" name="q" placeholder="Search products…" autocomplete="off"/>
-        </form>
+        <div class="search-wrap" id="search-wrap">
+          <form class="header-search" role="search" action="products.html" method="get">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" name="q" id="instant-search" placeholder="Search products, brands, deals…" autocomplete="off"/>
+          </form>
+          <div class="search-dropdown" id="search-dropdown"></div>
+        </div>
         <div class="nav-actions">
+          <button class="theme-toggle" aria-label="Toggle dark mode" data-action="toggle-theme">
+            <svg class="moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg class="sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </button>
           <select class="currency-select" aria-label="Currency">
             ${Object.keys(CURRENCIES).map((c) => `<option value="${c}">${c}</option>`).join("")}
           </select>
@@ -667,6 +804,289 @@ function renderLayout() {
   if (localStorage.getItem(COOKIE_KEY) !== "1") {
     setTimeout(() => document.getElementById("cookie-banner")?.classList.add("show"), 800);
   }
+
+  // Wire up the upgraded header (mega menu, instant search, social proof, compare bar)
+  initMegaMenu();
+  initInstantSearch();
+  initCompareBar();
+  initSocialProof();
+  initQuickViewModal();
+}
+
+// ---- Mega menu ----
+async function initMegaMenu() {
+  const trigger = document.getElementById("megamenu-trigger");
+  const menu = document.getElementById("megamenu");
+  if (!trigger || !menu) return;
+
+  try {
+    const products = await loadProducts();
+    const categories = [...new Set(products.map((p) => p.category))];
+    document.getElementById("megamenu-categories").innerHTML = categories.map((c) => {
+      const count = products.filter((p) => p.category === c).length;
+      return `<a href="products.html?category=${encodeURIComponent(c)}">${escapeHtml(c)} <small>${count}</small></a>`;
+    }).join("") + `<a href="products.html?sort=price_asc"><strong>All deals →</strong></a>`;
+
+    const featured = products.filter((p) => p.badges?.includes("featured") || p.badges?.includes("best_seller")).slice(0, 4);
+    document.getElementById("megamenu-featured").innerHTML = featured.map((p) => `
+      <a class="megamenu-card" href="product.html?id=${p.id}">
+        <div class="img"><img src="${productImage(p)}" alt="${escapeHtml(p.title)}" loading="lazy"/></div>
+        <div class="info">
+          <div class="label">${escapeHtml(p.title)}</div>
+          <div class="price">${formatPrice(p.price)}</div>
+        </div>
+      </a>
+    `).join("");
+  } catch {}
+
+  let hoverTimer;
+  const open = () => {
+    clearTimeout(hoverTimer);
+    menu.classList.add("open");
+    trigger.setAttribute("aria-expanded", "true");
+  };
+  const close = () => {
+    hoverTimer = setTimeout(() => {
+      menu.classList.remove("open");
+      trigger.setAttribute("aria-expanded", "false");
+    }, 150);
+  };
+  trigger.addEventListener("mouseenter", open);
+  trigger.addEventListener("focus", open);
+  trigger.addEventListener("click", (e) => {
+    e.preventDefault();
+    menu.classList.contains("open") ? close() : open();
+  });
+  const wrap = document.getElementById("megamenu-wrap");
+  wrap?.addEventListener("mouseleave", close);
+  menu.addEventListener("mouseenter", () => clearTimeout(hoverTimer));
+  menu.addEventListener("mouseleave", close);
+}
+
+// ---- Instant search dropdown ----
+async function initInstantSearch() {
+  const input = document.getElementById("instant-search");
+  const dropdown = document.getElementById("search-dropdown");
+  if (!input || !dropdown) return;
+
+  let products = [];
+  try { products = await loadProducts(); } catch { return; }
+
+  let debounceTimer;
+  function close() { dropdown.classList.remove("open"); }
+  function render(query) {
+    if (!query) { close(); return; }
+    const q = query.toLowerCase();
+    const matches = products
+      .filter((p) =>
+        p.title.toLowerCase().includes(q) ||
+        p.brand.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q)
+      )
+      .slice(0, 6);
+
+    if (matches.length === 0) {
+      dropdown.innerHTML = `<div class="search-empty">
+        No results for "<strong>${escapeHtml(query)}</strong>".
+        <div style="margin-top:8px"><a href="products.html?q=${encodeURIComponent(query)}" class="link">Browse all products →</a></div>
+      </div>`;
+    } else {
+      const suggestions = [...new Set(matches.map((p) => p.category))].slice(0, 3);
+      dropdown.innerHTML = `
+        ${suggestions.length ? `<div class="search-suggest">Categories: ${suggestions.map((c) => `<a href="products.html?category=${encodeURIComponent(c)}" class="link" style="margin-right:8px">${escapeHtml(c)}</a>`).join("")}</div>` : ""}
+        ${matches.map((p) => `
+          <a href="product.html?id=${p.id}" class="search-result">
+            <img src="${productImage(p)}" alt="${escapeHtml(p.title)}"/>
+            <div>
+              <div class="title">${escapeHtml(p.title)}</div>
+              <div class="meta">${escapeHtml(p.brand)} · ${escapeHtml(p.category)}</div>
+            </div>
+            <div class="price">${formatPrice(p.price)}</div>
+          </a>
+        `).join("")}
+        <a href="products.html?q=${encodeURIComponent(query)}" class="search-result" style="background:var(--bg-soft)">
+          <div></div>
+          <div class="title" style="font-weight:600">See all results for "${escapeHtml(query)}" →</div>
+          <div></div>
+        </a>
+      `;
+    }
+    dropdown.classList.add("open");
+  }
+
+  input.addEventListener("input", (e) => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => render(e.target.value.trim()), 150);
+  });
+  input.addEventListener("focus", () => { if (input.value.trim()) render(input.value.trim()); });
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#search-wrap")) close();
+  });
+}
+
+// ---- Compare bar ----
+function initCompareBar() {
+  const bar = document.createElement("div");
+  bar.className = "compare-bar hidden";
+  bar.id = "compare-bar";
+  document.body.appendChild(bar);
+
+  const products = window._productsCache;
+  async function render() {
+    const ids = Compare.get();
+    if (ids.length === 0) {
+      bar.classList.add("hidden");
+      return;
+    }
+    bar.classList.remove("hidden");
+    const all = await loadProducts().catch(() => []);
+    const items = ids.map((id) => all.find((p) => p.id === id)).filter(Boolean);
+    const slots = [];
+    for (let i = 0; i < Compare.MAX; i++) {
+      const p = items[i];
+      slots.push(p
+        ? `<div class="slot"><img src="${productImage(p)}" alt="${escapeHtml(p.title)}"/><button data-compare-remove="${p.id}" aria-label="Remove">×</button></div>`
+        : `<div class="slot empty">+</div>`);
+    }
+    bar.innerHTML = `
+      <div class="compare-bar-items">${slots.join("")}</div>
+      <a href="compare.html" class="btn btn-primary btn-sm">Compare (${items.length})</a>
+      <button class="btn btn-ghost btn-sm" data-compare-clear>Clear</button>
+    `;
+  }
+  render();
+  document.addEventListener("compare:changed", render);
+}
+
+// ---- Social proof popup ----
+async function initSocialProof() {
+  if (sessionStorage.getItem("sp-shown") === "1") return;
+  let products;
+  try { products = await loadProducts(); } catch { return; }
+  if (!products.length) return;
+
+  const purchasers = [
+    { name: "Maya R.", city: "New York, NY" },
+    { name: "Aarav S.", city: "Mumbai, IN" },
+    { name: "Lena K.", city: "Berlin, DE" },
+    { name: "Diego M.", city: "Madrid, ES" },
+    { name: "Priya P.", city: "Bangalore, IN" },
+    { name: "Tomás L.", city: "Buenos Aires, AR" },
+    { name: "Sara J.", city: "Toronto, CA" },
+    { name: "Hiro N.", city: "Tokyo, JP" },
+    { name: "Emily B.", city: "Sydney, AU" },
+  ];
+
+  let shown = 0;
+  const MAX_SHOWN = 4;
+
+  function showOne() {
+    if (shown >= MAX_SHOWN) return;
+    const product = products[Math.floor(Math.random() * products.length)];
+    const buyer = purchasers[Math.floor(Math.random() * purchasers.length)];
+    const minutes = Math.floor(Math.random() * 28) + 2;
+
+    const el = document.createElement("div");
+    el.className = "social-proof";
+    el.innerHTML = `
+      <img src="${productImage(product)}" alt="${escapeHtml(product.title)}"/>
+      <div class="msg">
+        <strong>${escapeHtml(buyer.name)} from ${escapeHtml(buyer.city)}</strong>
+        just bought <a href="product.html?id=${product.id}" class="link">${escapeHtml(product.title)}</a>
+        <div class="when">${minutes} min ago</div>
+      </div>
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => el.classList.add("show"), 50);
+    setTimeout(() => {
+      el.classList.remove("show");
+      setTimeout(() => el.remove(), 400);
+    }, 5500);
+
+    shown++;
+    if (shown < MAX_SHOWN) {
+      setTimeout(showOne, 9000 + Math.random() * 6000);
+    } else {
+      sessionStorage.setItem("sp-shown", "1");
+    }
+  }
+
+  setTimeout(showOne, 6000);
+}
+
+// ---- Quick view modal ----
+function initQuickViewModal() {
+  if (document.getElementById("quick-view")) return;
+  const backdrop = document.createElement("div");
+  backdrop.className = "quick-view-backdrop";
+  backdrop.id = "quick-view-backdrop";
+  document.body.appendChild(backdrop);
+
+  const modal = document.createElement("div");
+  modal.className = "quick-view";
+  modal.id = "quick-view";
+  modal.innerHTML = `<button class="quick-view-close" data-action="close-quick-view" aria-label="Close">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>`;
+  document.body.appendChild(modal);
+
+  backdrop.addEventListener("click", closeQuickView);
+}
+
+async function openQuickView(productId) {
+  const modal = document.getElementById("quick-view");
+  const backdrop = document.getElementById("quick-view-backdrop");
+  if (!modal || !backdrop) return;
+  let p;
+  try {
+    const products = await loadProducts();
+    p = products.find((x) => x.id === productId);
+  } catch {}
+  if (!p) return;
+
+  const disc = discountPercent(p);
+  const stats = effectiveStats(p);
+  const badges = [];
+  if (disc > 0) badges.push(`<span class="badge sale">-${disc}%</span>`);
+  if (p.badges?.includes("new")) badges.push(`<span class="badge new">New</span>`);
+  if (p.badges?.includes("best_seller")) badges.push(`<span class="badge best">Best seller</span>`);
+
+  modal.innerHTML = `
+    <div class="quick-view-img">
+      <div class="qv-badge-row">${badges.join("")}</div>
+      <img src="${(p.images && p.images[0]) || p.image}" alt="${escapeHtml(p.title)}"/>
+    </div>
+    <div class="quick-view-info">
+      <button class="quick-view-close" data-action="close-quick-view" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="product-meta">${escapeHtml(p.brand)} · ${escapeHtml(p.category)}</div>
+      <h2>${escapeHtml(p.title)}</h2>
+      <div class="detail-rating">
+        ${ratingStars(stats.rating, 14)}
+        <span style="font-size:13px">${stats.rating.toFixed(1)} · ${stats.count} reviews</span>
+      </div>
+      <div style="font-size:24px;font-weight:700">${formatPrice(p.price)}
+        ${p.compare_at ? `<span class="price-old">${formatPrice(p.compare_at)}</span>` : ""}
+      </div>
+      <p class="text-muted" style="margin:16px 0">${escapeHtml(p.short || "")}</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" data-action="qv-add" data-id="${p.id}" ${p.in_stock ? "" : "disabled"}>
+          ${p.in_stock ? "Add to cart" : "Out of stock"}
+        </button>
+        <a href="product.html?id=${p.id}" class="btn btn-outline">View full details →</a>
+      </div>
+    </div>
+  `;
+  document.getElementById("quick-view-backdrop").classList.add("open");
+  modal.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeQuickView() {
+  document.getElementById("quick-view")?.classList.remove("open");
+  document.getElementById("quick-view-backdrop")?.classList.remove("open");
+  document.body.style.overflow = "";
 }
 
 // ---- Drawer / menu open close ----
@@ -742,9 +1162,57 @@ document.addEventListener("click", async (e) => {
     renderMiniCart();
     return;
   }
+  if (action === "toggle-theme") {
+    const next = Theme.toggle();
+    toast(next === "dark" ? "Dark mode on" : "Light mode on");
+    return;
+  }
+  if (action === "close-quick-view") { closeQuickView(); return; }
+  if (action === "qv-add") {
+    const id = target.closest("[data-action]").dataset.id;
+    try {
+      const products = await loadProducts();
+      const p = products.find((x) => x.id === id);
+      if (!p || !p.in_stock) return;
+      Cart.add(p, 1);
+      closeQuickView();
+      openDrawer("cart-drawer");
+    } catch {}
+    return;
+  }
 
   // Backdrop click closes drawers
   if (target.id === "drawer-backdrop") { closeDrawer(); return; }
+
+  // Quick view (from product card)
+  const qvBtn = target.closest("[data-quick-view]");
+  if (qvBtn) {
+    e.preventDefault();
+    openQuickView(qvBtn.dataset.quickView);
+    return;
+  }
+
+  // Compare toggle
+  const compareInput = target.closest("[data-compare]");
+  if (compareInput && target.tagName === "INPUT") {
+    const id = compareInput.dataset.compare;
+    const added = Compare.toggle(id);
+    if (!added && Compare.has(id)) compareInput.checked = true;
+    else compareInput.checked = Compare.has(id);
+    document.querySelector(`[data-compare-label="${id}"]`)?.classList.toggle("active", Compare.has(id));
+    return;
+  }
+
+  // Compare remove
+  const cmpRm = target.closest("[data-compare-remove]");
+  if (cmpRm) {
+    Compare.remove(cmpRm.dataset.compareRemove);
+    return;
+  }
+  if (target.closest("[data-compare-clear]")) {
+    Compare.clear();
+    return;
+  }
 
   // Wishlist toggle (from product cards)
   const wishBtn = target.closest("[data-wishlist]");
@@ -804,6 +1272,30 @@ function stampYear() {
   document.querySelectorAll("[data-year]").forEach((el) => {
     el.textContent = new Date().getFullYear();
   });
+}
+
+// ---- Service worker (PWA + offline-tolerant) ----
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+
+// ---- Estimated delivery date (cart/checkout) ----
+function estimatedDelivery(country = "US", method = "standard") {
+  const days = method === "express" ? [1, 2]
+    : (country === "US" || country === "United States") ? [3, 5]
+    : (country === "Canada" || country === "United Kingdom" || country === "EU") ? [4, 7]
+    : [7, 14];
+  const fromDate = new Date(Date.now() + days[0] * 86400000);
+  const toDate = new Date(Date.now() + days[1] * 86400000);
+  const fmt = (d) => d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  return `${fmt(fromDate)} – ${fmt(toDate)}`;
+}
+
+// ---- Loyalty points formula (1pt per $1 spent) ----
+function pointsForCart() {
+  return Math.floor(Cart.subtotal());
 }
 
 // ---- Boot ----

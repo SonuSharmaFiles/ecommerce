@@ -2,6 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://sonusharmafiles.github.io/ecommerce/</loc><priority>1.0</priority><changefreq>daily</changefreq></url>
   <url><loc>https://sonusharmafiles.github.io/ecommerce/products.html</loc><priority>0.9</priority><changefreq>daily</changefreq></url>
+  <url><loc>https://sonusharmafiles.github.io/ecommerce/compare.html</loc><priority>0.6</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://sonusharmafiles.github.io/ecommerce/about.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://sonusharmafiles.github.io/ecommerce/contact.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://sonusharmafiles.github.io/ecommerce/faq.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>

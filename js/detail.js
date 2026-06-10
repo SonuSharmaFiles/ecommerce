@@ -112,6 +112,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         ${p.in_stock ? `<span class="text-muted" style="margin-left:8px;font-size:13px">Ships within 1–3 business days</span>` : ""}
       </div>
 
+      ${p.in_stock ? `
+      <div class="urgency-stack">
+        <div class="urgency-row"><span class="pulse"></span><span><strong>${Math.floor(Math.random() * 18 + 6)}</strong> sold today</span></div>
+        <div class="urgency-row"><span class="pulse warning"></span><span><strong>${Math.floor(Math.random() * 30 + 8)}</strong> people viewing this</span></div>
+        <div class="urgency-row"><span class="pulse"></span><span>Order in the next <strong>2h 14m</strong> for delivery by <strong>${estimatedDelivery("US")}</strong></span></div>
+      </div>
+      ` : ""}
+
       ${variantSets.map((v) => `
         <div class="variant-block" data-variant-name="${v.name}">
           <label>${escapeHtml(v.label)}: <strong data-variant-selected>${escapeHtml(v.options[0])}</strong></label>
@@ -143,6 +151,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class="detail-perk">🚚 Free over $75</div>
         <div class="detail-perk">🔒 Secure checkout</div>
         <div class="detail-perk">↩ 30-day returns</div>
+      </div>
+
+      <div class="loyalty-banner">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <div class="text">
+          <strong>Earn ${Math.round(p.price)} reward points</strong>
+          on this order — <a href="account.html">join Rewards free</a> and save on every purchase.
+        </div>
       </div>
     </div>
 
@@ -256,6 +272,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     toast(isOn ? "Saved to wishlist" : "Removed from wishlist");
   });
 
+  // BreadcrumbList JSON-LD
+  const breadcrumbLd = document.createElement("script");
+  breadcrumbLd.type = "application/ld+json";
+  breadcrumbLd.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "/" },
+      { "@type": "ListItem", position: 2, name: "Shop", item: "/products.html" },
+      { "@type": "ListItem", position: 3, name: p.category, item: `/products.html?category=${encodeURIComponent(p.category)}` },
+      { "@type": "ListItem", position: 4, name: p.title, item: `/product.html?id=${p.id}` },
+    ],
+  });
+  document.head.appendChild(breadcrumbLd);
+
+  // Frequently bought together: this product + 2 from same category
+  const fbtCandidates = products.filter((x) => x.id !== p.id && x.category === p.category && x.in_stock).slice(0, 2);
+  renderFBT(p, fbtCandidates);
+
   // Related
   const related = products.filter((x) => x.id !== p.id && x.category === p.category).slice(0, 4);
   const rel = document.getElementById("related-grid");
@@ -274,6 +309,66 @@ document.addEventListener("DOMContentLoaded", async () => {
     else if (recSec) recSec.style.display = "none";
   }
 });
+
+// Frequently Bought Together (bundle with 10% discount)
+function renderFBT(main, others) {
+  const slot = document.getElementById("fbt-slot");
+  if (!slot || others.length === 0) return;
+  const bundleItems = [main, ...others];
+  const selected = new Set(bundleItems.map((p) => p.id));
+
+  function render() {
+    const totalRaw = bundleItems.filter((p) => selected.has(p.id)).reduce((s, p) => s + p.price, 0);
+    const bundleDisc = selected.size >= 2 ? totalRaw * 0.10 : 0;
+    const finalTotal = totalRaw - bundleDisc;
+
+    slot.innerHTML = `
+      <div class="fbt">
+        <h3 style="margin:0 0 6px;font-size:17px">Frequently bought together</h3>
+        <p class="text-muted" style="margin:0;font-size:13px">Bundle and save 10% on these items.</p>
+        <div class="fbt-grid">
+          ${bundleItems.map((p, i) => `
+            <div class="fbt-item">
+              <a href="product.html?id=${p.id}"><img src="${productImage(p)}" alt="${escapeHtml(p.title)}"/></a>
+              <div class="title">${escapeHtml(p.title)}</div>
+              <div class="price">${formatPrice(p.price)}</div>
+              <label><input type="checkbox" data-fbt="${p.id}" ${selected.has(p.id) ? "checked" : ""} ${i === 0 ? "disabled" : ""}/> ${i === 0 ? "This item" : "Include"}</label>
+            </div>
+            ${i < bundleItems.length - 1 ? `<span class="fbt-plus">+</span>` : ""}
+          `).join("")}
+        </div>
+        <div class="fbt-total">
+          <div>
+            <span class="text-muted" style="font-size:13px">Total:</span>
+            <strong style="font-size:18px;margin-left:6px">${formatPrice(finalTotal)}</strong>
+            ${bundleDisc > 0 ? `<span class="savings">Save ${formatPrice(bundleDisc)}</span>` : ""}
+          </div>
+          <button class="btn btn-primary" id="fbt-add">Add bundle to cart</button>
+        </div>
+      </div>
+    `;
+    slot.querySelectorAll("[data-fbt]").forEach((cb) => {
+      cb.addEventListener("change", (e) => {
+        const id = e.target.dataset.fbt;
+        if (e.target.checked) selected.add(id);
+        else selected.delete(id);
+        render();
+      });
+    });
+    slot.querySelector("#fbt-add")?.addEventListener("click", () => {
+      let added = 0;
+      bundleItems.filter((p) => selected.has(p.id) && p.in_stock).forEach((p) => {
+        Cart.add(p, 1);
+        added++;
+      });
+      if (added > 0) {
+        toast(`Added ${added} item${added === 1 ? "" : "s"} to cart`);
+        openDrawer("cart-drawer");
+      }
+    });
+  }
+  render();
+}
 
 function pickVariantsFor(p) {
   const t = p.title.toLowerCase();
@@ -342,6 +437,22 @@ function renderReviewsPanel(p) {
       <button class="btn btn-primary btn-sm" id="open-review-form">Write a review</button>
     </div>
 
+    <div class="review-filters">
+      <button class="review-filter-chip active" data-filter="all">All</button>
+      <button class="review-filter-chip" data-filter="5">5 ★</button>
+      <button class="review-filter-chip" data-filter="4">4 ★</button>
+      <button class="review-filter-chip" data-filter="3">3 ★</button>
+      <button class="review-filter-chip" data-filter="2">2 ★</button>
+      <button class="review-filter-chip" data-filter="1">1 ★</button>
+      <button class="review-filter-chip" data-filter="photos">With photos</button>
+      <select class="review-sort">
+        <option value="newest">Most recent</option>
+        <option value="helpful">Most helpful</option>
+        <option value="rating_desc">Highest rated</option>
+        <option value="rating_asc">Lowest rated</option>
+      </select>
+    </div>
+
     <div id="review-form-wrap"></div>
 
     <div id="review-list">
@@ -353,24 +464,80 @@ function renderReviewsPanel(p) {
     </p>
   `;
 
-  document.getElementById("open-review-form").addEventListener("click", () => openReviewForm(p));
-  panel.querySelectorAll("[data-edit-review]").forEach((btn) => {
-    btn.addEventListener("click", () => openReviewForm(p, btn.dataset.editReview));
-  });
-  panel.querySelectorAll("[data-delete-review]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      if (confirm("Delete this review?")) {
-        Reviews.remove(btn.dataset.deleteReview);
-        toast("Review deleted");
-      }
+  // Filter + sort behavior (no full re-render — just toggle list)
+  let activeFilter = "all";
+  let activeSort = "newest";
+  function rerenderList() {
+    let list = all.slice();
+    if (activeFilter === "photos") list = list.filter((r) => !!r.imageDataUrl);
+    else if (activeFilter !== "all") list = list.filter((r) => r.rating === Number(activeFilter));
+    switch (activeSort) {
+      case "rating_desc": list.sort((a, b) => b.rating - a.rating); break;
+      case "rating_asc": list.sort((a, b) => a.rating - b.rating); break;
+      case "helpful":
+        list.sort((a, b) => {
+          const hb = Helpful.countFor(b.id || `s-${b.author}-${b.date}`, b.helpful || 0);
+          const ha = Helpful.countFor(a.id || `s-${a.author}-${a.date}`, a.helpful || 0);
+          return hb - ha;
+        }); break;
+      default: // newest first — user reviews already first
+        break;
+    }
+    const list2 = document.getElementById("review-list");
+    list2.innerHTML = list.length
+      ? list.map(reviewCardHTML).join("")
+      : `<p class="text-muted" style="padding:20px 0">No reviews match this filter.</p>`;
+    wireReviewActions();
+  }
+  panel.querySelectorAll(".review-filter-chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      panel.querySelectorAll(".review-filter-chip").forEach((c) => c.classList.remove("active"));
+      chip.classList.add("active");
+      activeFilter = chip.dataset.filter;
+      rerenderList();
     });
   });
+  panel.querySelector(".review-sort").addEventListener("change", (e) => {
+    activeSort = e.target.value;
+    rerenderList();
+  });
+
+  function wireReviewActions() {
+    panel.querySelectorAll("[data-edit-review]").forEach((btn) => {
+      btn.addEventListener("click", () => openReviewForm(p, btn.dataset.editReview));
+    });
+    panel.querySelectorAll("[data-delete-review]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (confirm("Delete this review?")) {
+          Reviews.remove(btn.dataset.deleteReview);
+          toast("Review deleted");
+        }
+      });
+    });
+    panel.querySelectorAll("[data-helpful]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.helpful;
+        const isOn = Helpful.toggle(id);
+        btn.classList.toggle("active", isOn);
+        const countSpan = btn.querySelector("[data-helpful-count]");
+        if (countSpan) {
+          countSpan.textContent = String(Number(countSpan.dataset.baseline) + (isOn ? 1 : 0));
+        }
+      });
+    });
+  }
+
+  document.getElementById("open-review-form").addEventListener("click", () => openReviewForm(p));
+  wireReviewActions();
 }
 
 function reviewCardHTML(r) {
   const isUser = r.source === "user";
   const canEdit = isUser && Reviews.canEdit(r.id);
   const dateLabel = isUser ? relativeTime(r.createdAt) : (r.date || "");
+  const reviewKey = r.id || `s-${r.author}-${r.date}`;
+  const baselineHelpful = r.helpful != null ? r.helpful : Math.floor(Math.random() * 15 + 3);
+  const userVoted = Helpful.voted(reviewKey);
 
   return `
     <div class="review-card">
@@ -390,6 +557,12 @@ function reviewCardHTML(r) {
       ${r.title ? `<div class="review-title">${escapeHtml(r.title)}</div>` : ""}
       <p class="review-body">${escapeHtml(r.body || "")}</p>
       ${r.imageDataUrl ? `<div class="review-image"><img src="${r.imageDataUrl}" alt="Customer photo"/></div>` : ""}
+      <div class="review-helpful">
+        <span>Was this helpful?</span>
+        <button class="${userVoted ? "active" : ""}" data-helpful="${reviewKey}">
+          👍 Helpful (<span data-helpful-count data-baseline="${baselineHelpful}">${baselineHelpful + (userVoted ? 1 : 0)}</span>)
+        </button>
+      </div>
       ${canEdit ? `
         <div class="review-actions">
           <button class="btn btn-outline btn-sm" data-edit-review="${r.id}">Edit</button>
