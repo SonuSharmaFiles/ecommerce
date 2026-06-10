@@ -329,15 +329,15 @@ function discountPercent(p) {
   if (!p.compare_at || p.compare_at <= p.price) return 0;
   return Math.round(((p.compare_at - p.price) / p.compare_at) * 100);
 }
+// Renders 5 stars where the gold fill exactly matches the rating fraction.
+// A rating of 4.7 → first 4 stars fully gold, 5th star 70% gold left-to-right.
 function ratingStars(rating, size = 12) {
-  const full = Math.round(rating);
-  let s = "";
-  for (let i = 0; i < 5; i++) {
-    s += i < full
-      ? `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01z"/></svg>`
-      : `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01z"/></svg>`;
-  }
-  return s;
+  const max = 5;
+  const r = Math.max(0, Math.min(max, Number(rating) || 0));
+  const pct = (r / max) * 100;
+  const star = `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01z"/></svg>`;
+  const row = star.repeat(5);
+  return `<span class="stars" role="img" aria-label="${r.toFixed(1)} out of ${max} stars"><span class="stars-bg">${row}</span><span class="stars-fg" style="width:${pct.toFixed(2)}%">${row}</span></span>`;
 }
 function escapeHtml(s) {
   if (s == null) return "";
