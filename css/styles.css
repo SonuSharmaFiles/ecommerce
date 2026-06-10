@@ -1327,7 +1327,13 @@ html[data-theme="dark"] .toast,
 html[data-theme="dark"] .icon-badge,
 html[data-theme="dark"] .form-card .step-num,
 html[data-theme="dark"] .skip-link,
-html[data-theme="dark"] .cart-row .qty-row button:hover {
+html[data-theme="dark"] .cart-row .qty-row button:hover,
+/* These were missed in the earlier sweep — same `bg: var(--ink); color: #fff` pattern */
+html[data-theme="dark"] .countdown span,
+html[data-theme="dark"] .review-filter-chip.active,
+html[data-theme="dark"] .review-helpful button.active,
+html[data-theme="dark"] .compare-bar-items .slot button,
+html[data-theme="dark"] .review-image-preview button {
   color: var(--primary-foreground);
 }
 html[data-theme="dark"] .badge.best,
