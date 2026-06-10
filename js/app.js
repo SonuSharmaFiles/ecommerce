@@ -9,6 +9,128 @@ const PROMO_KEY = "shopflow-promo";
 const COOKIE_KEY = "shopflow-cookies-ok";
 const CURRENCY_KEY = "shopflow-currency";
 const PROMO_BAR_KEY = "shopflow-promo-bar-dismissed";
+const REVIEWS_KEY = "shopflow-reviews";
+const BROWSER_KEY = "shopflow-browser-id";
+
+// ---- Browser identity (stable per browser, used to gate edit/delete) ----
+function getBrowserId() {
+  let id = localStorage.getItem(BROWSER_KEY);
+  if (!id) {
+    id = (typeof crypto !== "undefined" && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : "b-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
+    localStorage.setItem(BROWSER_KEY, id);
+  }
+  return id;
+}
+
+// ---- Reviews (localStorage, per-browser identity) ----
+const Reviews = {
+  all() {
+    try { return JSON.parse(localStorage.getItem(REVIEWS_KEY)) || []; }
+    catch { return []; }
+  },
+  list(productId) {
+    return this.all()
+      .filter((r) => r.productId === productId)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  },
+  add(productId, data) {
+    const reviews = this.all();
+    const review = {
+      id: (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)),
+      productId,
+      browserId: getBrowserId(),
+      author: data.author,
+      rating: Math.max(1, Math.min(5, Number(data.rating) || 5)),
+      title: data.title || "",
+      body: data.body || "",
+      imageDataUrl: data.imageDataUrl || null,
+      createdAt: new Date().toISOString(),
+    };
+    reviews.push(review);
+    localStorage.setItem(REVIEWS_KEY, JSON.stringify(reviews));
+    document.dispatchEvent(new CustomEvent("reviews:changed", { detail: productId }));
+    return review;
+  },
+  update(id, data) {
+    const reviews = this.all();
+    const idx = reviews.findIndex((r) => r.id === id);
+    if (idx === -1) return false;
+    if (reviews[idx].browserId !== getBrowserId()) return false;
+    reviews[idx] = {
+      ...reviews[idx],
+      author: data.author ?? reviews[idx].author,
+      rating: data.rating != null ? Math.max(1, Math.min(5, Number(data.rating))) : reviews[idx].rating,
+      title: data.title ?? reviews[idx].title,
+      body: data.body ?? reviews[idx].body,
+      imageDataUrl: data.imageDataUrl !== undefined ? data.imageDataUrl : reviews[idx].imageDataUrl,
+      updatedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(REVIEWS_KEY, JSON.stringify(reviews));
+    document.dispatchEvent(new CustomEvent("reviews:changed", { detail: reviews[idx].productId }));
+    return reviews[idx];
+  },
+  remove(id) {
+    const reviews = this.all();
+    const review = reviews.find((r) => r.id === id);
+    if (!review) return false;
+    if (review.browserId !== getBrowserId()) return false;
+    const remaining = reviews.filter((r) => r.id !== id);
+    localStorage.setItem(REVIEWS_KEY, JSON.stringify(remaining));
+    document.dispatchEvent(new CustomEvent("reviews:changed", { detail: review.productId }));
+    return true;
+  },
+  canEdit(id) {
+    const r = this.all().find((x) => x.id === id);
+    return !!(r && r.browserId === getBrowserId());
+  },
+};
+
+// ---- Image helper: resize and convert to base64 ----
+async function fileToResizedDataUrl(file, maxWidth = 800, quality = 0.85) {
+  if (!file || !file.type.startsWith("image/")) {
+    throw new Error("Please upload an image file.");
+  }
+  if (file.size > 12 * 1024 * 1024) {
+    throw new Error("Image too large. Please use one under 12MB.");
+  }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxWidth / img.width);
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.onerror = () => reject(new Error("Could not load that image."));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error("Could not read the file."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function relativeTime(iso) {
+  const d = new Date(iso);
+  const diff = Date.now() - d.getTime();
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return "Just now";
+  if (min < 60) return `${min} min ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.floor(hr / 24);
+  if (day < 7) return `${day}d ago`;
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
 
 const SITE = {
   name: "ShopFlow",

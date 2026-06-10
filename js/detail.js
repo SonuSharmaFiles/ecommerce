@@ -54,11 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const disc = discountPercent(p);
   const inWishlist = Wishlist.has(p.id);
   const images = p.images && p.images.length ? p.images : [p.image];
-
-  // Random low-stock indicator for in-stock items
   const lowStock = p.in_stock && Math.random() < 0.35 ? Math.floor(Math.random() * 6) + 3 : null;
-
-  // Sample variants if appropriate
   const variantSets = pickVariantsFor(p);
 
   document.getElementById("crumbs").innerHTML = `
@@ -143,7 +139,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       <div class="tab-buttons">
         <button class="tab-button active" data-tab="desc">Description</button>
         <button class="tab-button" data-tab="specs">Specifications</button>
-        <button class="tab-button" data-tab="reviews">Reviews (${p.ratings_count})</button>
+        <button class="tab-button" data-tab="reviews-tab">Reviews</button>
         <button class="tab-button" data-tab="shipping">Shipping</button>
       </div>
       <div class="tab-panel active" data-panel="desc">
@@ -154,7 +150,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           ${(p.specs || []).map((s) => `<tr><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.value)}</td></tr>`).join("")}
         </table>
       </div>
-      <div class="tab-panel" data-panel="reviews">${renderReviews(p)}</div>
+      <div class="tab-panel" data-panel="reviews-tab" id="reviews-panel"></div>
       <div class="tab-panel" data-panel="shipping">
         <p>Free standard shipping on orders over $75. Express options at checkout.</p>
         <ul>
@@ -166,6 +162,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       </div>
     </div>
   `;
+
+  renderReviewsPanel(p);
+  document.addEventListener("reviews:changed", (e) => {
+    if (e.detail === p.id || !e.detail) renderReviewsPanel(p);
+  });
 
   // Sticky mobile CTA
   const sticky = document.createElement("div");
@@ -225,7 +226,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  // Add to cart
   function addNow() {
     if (!p.in_stock) return;
     const qty = Math.max(1, Number(qtyInput.value) || 1);
@@ -235,7 +235,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("dt-add").addEventListener("click", addNow);
   document.getElementById("sticky-add").addEventListener("click", addNow);
 
-  // Wishlist
   const wishBtn = document.getElementById("dt-wish");
   wishBtn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -279,22 +278,39 @@ function pickVariantsFor(p) {
   return out;
 }
 
-function renderReviews(p) {
-  const reviews = sampleReviewsFor(p);
-  const dist = [0, 0, 0, 0, 0];
-  reviews.forEach((r) => dist[r.rating - 1]++);
+/* ===================================================================
+   Reviews panel — combines built-in + user-submitted reviews,
+   with write/edit/delete and image upload.
+   =================================================================== */
 
-  return `
+function renderReviewsPanel(p) {
+  const panel = document.getElementById("reviews-panel");
+  if (!panel) return;
+
+  const userReviews = Reviews.list(p.id);
+  const samples = sampleReviewsFor(p);
+  const all = [
+    ...userReviews.map((r) => ({ ...r, source: "user" })),
+    ...samples.map((s) => ({ ...s, source: "sample" })),
+  ];
+
+  // Aggregate stats — including the user-submitted ones
+  const ratings = all.map((r) => r.rating);
+  const avg = ratings.length ? ratings.reduce((s, r) => s + r, 0) / ratings.length : p.rating;
+  const dist = [0, 0, 0, 0, 0];
+  all.forEach((r) => dist[r.rating - 1]++);
+
+  panel.innerHTML = `
     <div class="reviews-summary">
       <div>
-        <div class="avg-rating">${p.rating.toFixed(1)}</div>
-        <div class="avg-stars">${ratingStars(p.rating, 16)}</div>
-        <div class="text-muted" style="font-size:13px">${p.ratings_count} reviews</div>
+        <div class="avg-rating">${avg.toFixed(1)}</div>
+        <div class="avg-stars">${ratingStars(avg, 16)}</div>
+        <div class="text-muted" style="font-size:13px">${all.length} review${all.length === 1 ? "" : "s"}</div>
       </div>
       <div class="review-bars">
         ${[5,4,3,2,1].map((r) => {
           const count = dist[r-1];
-          const pct = reviews.length ? (count / reviews.length) * 100 : 0;
+          const pct = all.length ? (count / all.length) * 100 : 0;
           return `<div class="review-bar">
             <span>${r}★</span>
             <div class="bar"><span style="width:${pct}%"></span></div>
@@ -303,32 +319,212 @@ function renderReviews(p) {
         }).join("")}
       </div>
     </div>
-    <div>
-      ${reviews.map((r) => `
-        <div class="review-card">
-          <div class="review-head">
-            <div class="review-avatar">${getInitials(r.author)}</div>
-            <div class="review-meta">
-              <strong>${escapeHtml(r.author)}</strong>
-              <span>Verified buyer · ${escapeHtml(r.date)}</span>
-            </div>
-            <div class="review-stars">${ratingStars(r.rating)}</div>
-          </div>
-          <div class="review-title">${escapeHtml(r.title)}</div>
-          <p class="review-body">${escapeHtml(r.body)}</p>
-        </div>
-      `).join("")}
+
+    <div class="reviews-toolbar">
+      <strong>${all.length} review${all.length === 1 ? "" : "s"}</strong>
+      <button class="btn btn-primary btn-sm" id="open-review-form">Write a review</button>
     </div>
-    <div class="write-review">
-      <h4 style="margin:0 0 8px">Write a review</h4>
-      <p class="text-muted" style="margin:0 0 12px;font-size:13px">Reviews appear here after purchase.</p>
-      <a href="contact.html" class="btn btn-outline btn-sm">Contact us</a>
+
+    <div id="review-form-wrap"></div>
+
+    <div id="review-list">
+      ${all.map((r) => reviewCardHTML(r)).join("")}
+    </div>
+
+    <p class="text-muted" style="font-size:12px;margin-top:16px">
+      💡 Your reviews are saved in this browser. To make them visible to all visitors, add a backend (Firebase / Supabase) — ask in chat to wire it up.
+    </p>
+  `;
+
+  document.getElementById("open-review-form").addEventListener("click", () => openReviewForm(p));
+  panel.querySelectorAll("[data-edit-review]").forEach((btn) => {
+    btn.addEventListener("click", () => openReviewForm(p, btn.dataset.editReview));
+  });
+  panel.querySelectorAll("[data-delete-review]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (confirm("Delete this review?")) {
+        Reviews.remove(btn.dataset.deleteReview);
+        toast("Review deleted");
+      }
+    });
+  });
+}
+
+function reviewCardHTML(r) {
+  const isUser = r.source === "user";
+  const canEdit = isUser && Reviews.canEdit(r.id);
+  const dateLabel = isUser ? relativeTime(r.createdAt) : (r.date || "");
+
+  return `
+    <div class="review-card">
+      <div class="review-head">
+        <div class="review-avatar">${getInitials(r.author)}</div>
+        <div class="review-meta">
+          <strong>${escapeHtml(r.author || "Anonymous")}</strong>
+          <span>
+            ${isUser ? "" : "Verified buyer · "}
+            ${escapeHtml(dateLabel)}
+            ${r.updatedAt ? ` · edited ${escapeHtml(relativeTime(r.updatedAt))}` : ""}
+            ${canEdit ? ` · <span style="color:var(--success);font-weight:600">Your review</span>` : ""}
+          </span>
+        </div>
+        <div class="review-stars">${ratingStars(r.rating)}</div>
+      </div>
+      ${r.title ? `<div class="review-title">${escapeHtml(r.title)}</div>` : ""}
+      <p class="review-body">${escapeHtml(r.body || "")}</p>
+      ${r.imageDataUrl ? `<div class="review-image"><img src="${r.imageDataUrl}" alt="Customer photo"/></div>` : ""}
+      ${canEdit ? `
+        <div class="review-actions">
+          <button class="btn btn-outline btn-sm" data-edit-review="${r.id}">Edit</button>
+          <button class="btn btn-ghost btn-sm" data-delete-review="${r.id}" style="color:var(--danger)">Delete</button>
+        </div>
+      ` : ""}
     </div>
   `;
 }
 
+function openReviewForm(product, editId) {
+  const wrap = document.getElementById("review-form-wrap");
+  if (!wrap) return;
+
+  let existing = null;
+  if (editId) {
+    existing = Reviews.all().find((r) => r.id === editId);
+    if (!existing) { toast("Review not found"); return; }
+    if (!Reviews.canEdit(editId)) { toast("You can only edit your own reviews"); return; }
+  }
+
+  wrap.innerHTML = `
+    <form class="review-form" id="review-form" novalidate>
+      <h3 style="margin:0 0 6px">${existing ? "Edit your review" : "Write a review"}</h3>
+      <p class="text-muted" style="margin:0 0 16px;font-size:13px">
+        Share your experience with ${escapeHtml(product.title)}.
+      </p>
+
+      <label>Your rating</label>
+      <div class="star-picker" id="star-picker" data-value="${existing?.rating ?? 5}">
+        ${[1,2,3,4,5].map((n) => `
+          <button type="button" data-star="${n}" aria-label="${n} stars">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01z"/></svg>
+          </button>
+        `).join("")}
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="rv-author">Your name</label>
+          <input class="input" id="rv-author" required maxlength="60" value="${escapeHtml(existing?.author ?? "")}" />
+        </div>
+        <div>
+          <label for="rv-title">Title</label>
+          <input class="input" id="rv-title" maxlength="100" placeholder="Sums it up in a few words" value="${escapeHtml(existing?.title ?? "")}" />
+        </div>
+      </div>
+
+      <div class="form-row full">
+        <div>
+          <label for="rv-body">Your review</label>
+          <textarea class="input" id="rv-body" rows="5" required maxlength="2000" placeholder="What did you like? What could be better?">${escapeHtml(existing?.body ?? "")}</textarea>
+        </div>
+      </div>
+
+      <div class="form-row full">
+        <div>
+          <label>Add a photo (optional)</label>
+          <div class="review-image-upload">
+            <label for="rv-image" class="upload-trigger">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span>Choose image</span>
+              <input id="rv-image" type="file" accept="image/*" hidden/>
+            </label>
+            <div class="review-image-preview" id="rv-preview">
+              ${existing?.imageDataUrl ? `<img src="${existing.imageDataUrl}" alt="Preview"/><button type="button" data-remove-image>×</button>` : ""}
+            </div>
+          </div>
+          <small class="text-muted">JPG/PNG up to 12MB. Resized to 800px wide.</small>
+        </div>
+      </div>
+
+      <div class="review-form-actions">
+        <button type="submit" class="btn btn-primary">${existing ? "Save changes" : "Submit review"}</button>
+        <button type="button" class="btn btn-ghost" data-cancel-review>Cancel</button>
+      </div>
+    </form>
+  `;
+
+  wrap.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  // Track image data url in form state
+  let pendingImage = existing?.imageDataUrl || null;
+
+  // Star picker
+  const picker = wrap.querySelector("#star-picker");
+  function paintStars(n) {
+    picker.querySelectorAll("[data-star]").forEach((b) => {
+      b.classList.toggle("filled", Number(b.dataset.star) <= n);
+    });
+    picker.dataset.value = String(n);
+  }
+  paintStars(existing?.rating ?? 5);
+  picker.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-star]");
+    if (b) paintStars(Number(b.dataset.star));
+  });
+
+  // Image upload
+  const fileInput = wrap.querySelector("#rv-image");
+  const preview = wrap.querySelector("#rv-preview");
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files?.[0];
+    if (!file) return;
+    try {
+      const dataUrl = await fileToResizedDataUrl(file, 800, 0.85);
+      pendingImage = dataUrl;
+      preview.innerHTML = `<img src="${dataUrl}" alt="Preview"/><button type="button" data-remove-image>×</button>`;
+    } catch (err) {
+      toast(err.message || "Could not load that image.");
+    }
+  });
+  preview.addEventListener("click", (e) => {
+    if (e.target.closest("[data-remove-image]")) {
+      pendingImage = null;
+      preview.innerHTML = "";
+      fileInput.value = "";
+    }
+  });
+
+  // Cancel
+  wrap.querySelector("[data-cancel-review]").addEventListener("click", () => {
+    wrap.innerHTML = "";
+  });
+
+  // Submit
+  wrap.querySelector("#review-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const author = wrap.querySelector("#rv-author").value.trim();
+    const title = wrap.querySelector("#rv-title").value.trim();
+    const body = wrap.querySelector("#rv-body").value.trim();
+    const rating = Number(picker.dataset.value) || 5;
+    if (!author) { toast("Please enter your name"); return; }
+    if (!body) { toast("Please write your review"); return; }
+
+    try {
+      if (existing) {
+        Reviews.update(existing.id, { author, title, body, rating, imageDataUrl: pendingImage });
+        toast("Review updated");
+      } else {
+        Reviews.add(product.id, { author, title, body, rating, imageDataUrl: pendingImage });
+        toast("Thanks for your review!");
+      }
+      wrap.innerHTML = "";
+    } catch (err) {
+      // localStorage quota exceeded usually means too many big images
+      toast("Could not save — your browser storage may be full. Try removing the photo.");
+    }
+  });
+}
+
 function sampleReviewsFor(p) {
-  // Deterministic sample reviews seeded by product id
   const pool = [
     { author: "Maya R.", title: "Exceeded expectations", body: "Build quality is great and it arrived faster than expected.", rating: 5, date: "May 12" },
     { author: "Aarav S.", title: "Worth every dollar", body: "I've been using it daily for a month and it's still going strong.", rating: 5, date: "Apr 28" },
@@ -338,7 +534,6 @@ function sampleReviewsFor(p) {
     { author: "Tomás L.", title: "Highly recommended", body: "Bought one for my partner and one for myself.", rating: 5, date: "Mar 02" },
     { author: "Sara J.", title: "Decent value", body: "Does the job. Battery lasts about as advertised.", rating: 4, date: "Feb 22" },
   ];
-  // Hash-shift the pool by product id so each product looks different
   const seed = p.id.split("").reduce((s, c) => (s * 31 + c.charCodeAt(0)) >>> 0, 0);
   const shift = seed % pool.length;
   return [pool[shift], pool[(shift + 1) % pool.length], pool[(shift + 2) % pool.length]];
