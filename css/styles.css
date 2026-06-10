@@ -1325,10 +1325,7 @@ html[data-theme="dark"] .pagination button.active,
 html[data-theme="dark"] .variant-options button.active,
 html[data-theme="dark"] .toast,
 html[data-theme="dark"] .icon-badge,
-html[data-theme="dark"] .promo-bar,
-html[data-theme="dark"] .promo-bar .promo-close,
 html[data-theme="dark"] .form-card .step-num,
-html[data-theme="dark"] .review-avatar,
 html[data-theme="dark"] .skip-link,
 html[data-theme="dark"] .cart-row .qty-row button:hover {
   color: var(--primary-foreground);
@@ -1337,6 +1334,152 @@ html[data-theme="dark"] .badge.best,
 html[data-theme="dark"] .badge.warning {
   /* amber badge needs a dark text always */
   color: #422006;
+}
+
+/* These have non-inverting (always dark/colored) backgrounds — text must
+   stay light in dark mode rather than flip to var(--primary-foreground) */
+html[data-theme="dark"] .promo-bar,
+html[data-theme="dark"] .promo-bar a,
+html[data-theme="dark"] .promo-bar .promo-close,
+html[data-theme="dark"] .review-avatar {
+  color: #f1f5f9;
+}
+html[data-theme="dark"] .promo-bar .promo-close { opacity: .8; }
+html[data-theme="dark"] .promo-bar .promo-close:hover { opacity: 1; }
+
+/* ===================================================================
+   Mobile-first responsive sweep — larger touch targets, smarter
+   collapses, search in mobile drawer, responsive promo bar.
+   =================================================================== */
+
+/* Larger touch targets — Apple/Google HIG recommend 44px */
+@media (max-width: 720px) {
+  .icon-btn { width: 44px; height: 44px; }
+  .menu-toggle { width: 44px; height: 44px; }
+  .add-btn { min-height: 36px; padding: 8px 12px; }
+  .btn-sm { min-height: 36px; }
+  .wishlist-btn { width: 36px; height: 36px; padding: 10px; }
+  .quick-view-btn { display: none; } /* Hover-only, redundant on touch */
+}
+
+/* Tablet & mobile: hide header search-wrap completely (form was hidden but wrap took space) */
+@media (max-width: 980px) {
+  .search-wrap { display: none; }
+}
+
+/* Mobile drawer gets its own search */
+.mobile-drawer-search {
+  display: flex; gap: 8px; align-items: center;
+  background: var(--bg-soft); border: 1px solid var(--border);
+  padding: 8px 12px; border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+.mobile-drawer-search input {
+  flex: 1; border: 0; outline: 0; background: transparent; font-size: 15px;
+}
+
+/* Promo bar wraps on small screens instead of clipping */
+@media (max-width: 720px) {
+  .promo-bar {
+    height: auto; min-height: 36px;
+    padding: 8px 36px 8px 12px;
+  }
+  .promo-bar .promo-msg {
+    padding: 0;
+    font-size: 12px;
+    line-height: 1.35;
+    text-align: left;
+  }
+  .promo-bar .promo-close { right: 8px; top: 8px; transform: none; }
+}
+
+/* Mobile-first typography refinements */
+@media (max-width: 720px) {
+  body { font-size: 14px; }
+  .section-title { font-size: clamp(22px, 5.5vw, 28px); }
+  h1 { font-size: clamp(24px, 7vw, 36px); }
+  .container { padding: 0 16px; }
+  .breadcrumbs { font-size: 11px; }
+}
+
+/* Stack the hero CTAs full-width on tiny screens */
+@media (max-width: 480px) {
+  .hero h1 { font-size: clamp(28px, 9vw, 40px); }
+  .hero p { font-size: 16px; }
+  .hero-stats { gap: 20px; }
+  .hero-stat strong { font-size: 20px; }
+  .hero > div > div { flex-direction: column; align-items: stretch; }
+  .hero > div > div > .btn { width: 100%; }
+}
+
+/* Compare bar on mobile — make the buttons readable */
+@media (max-width: 720px) {
+  .compare-bar { padding: 10px 12px; gap: 8px; flex-wrap: wrap; }
+  .compare-bar .btn { padding: 8px 12px; font-size: 12px; }
+  .compare-bar-items { gap: 6px; }
+  .compare-bar-items .slot { width: 40px; height: 40px; }
+}
+
+/* Cart row on mobile: stack image + content cleanly */
+@media (max-width: 480px) {
+  .cart-row { grid-template-columns: 64px 1fr; gap: 12px; padding: 12px; }
+  .cart-row .line-total { grid-column: 1 / -1; text-align: right; padding-top: 4px; }
+  .cart-row img { width: 64px; height: 64px; }
+  .cart-row .row-bottom { flex-wrap: wrap; gap: 8px 12px; }
+}
+
+/* Product detail — sticky CTA buttons should be tap-friendly */
+@media (max-width: 720px) {
+  .sticky-cta { padding: 10px 14px; }
+  .sticky-cta .btn { min-height: 40px; padding: 10px 18px; }
+}
+
+/* Reviews on mobile — wider chips, smaller padding */
+@media (max-width: 720px) {
+  .review-filters { gap: 6px; }
+  .review-filter-chip { padding: 6px 10px; font-size: 12px; }
+  .review-sort { margin-left: 0; width: 100%; margin-top: 8px; }
+  .reviews-summary { padding: 14px 0; }
+  .reviews-summary .avg-rating { font-size: 44px; }
+}
+
+/* Account page — single column on small screens */
+@media (max-width: 480px) {
+  .account-nav { flex-direction: row; flex-wrap: wrap; position: static; }
+  .account-nav a { flex: 1 1 calc(50% - 4px); padding: 10px 12px; font-size: 13px; }
+  .reward-hero .big { font-size: 44px; }
+}
+
+/* Footer on mobile — tighten cols */
+@media (max-width: 480px) {
+  .footer-cols { gap: 24px; }
+  .footer-cols h4 { font-size: 13px; }
+  .footer-cols li { font-size: 13px; }
+}
+
+/* Form fields full-width on mobile */
+@media (max-width: 480px) {
+  .form-row { grid-template-columns: 1fr; }
+  .radio-row label { min-width: 100%; }
+  .checkout-layout .form-card { padding: 18px; }
+}
+
+/* Dropdown search results card sizing */
+@media (max-width: 980px) {
+  .search-dropdown { max-height: 70vh; }
+}
+
+/* Mega menu hidden on tablets too (only big screens have room for it) */
+@media (max-width: 980px) {
+  .megamenu-wrap { display: none; }
+}
+
+/* Skip-link should be visible above the promo bar on focus */
+.skip-link { z-index: 200; }
+
+/* Honor reduce-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 
 /* Backgrounds that hard-coded #fff and aren't already overridden */

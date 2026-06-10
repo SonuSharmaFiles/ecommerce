@@ -739,9 +739,15 @@ function renderLayout() {
         </button>
       </div>
       <div class="drawer-body">
+        <form class="mobile-drawer-search" role="search" action="products.html" method="get">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" name="q" placeholder="Search products…" autocomplete="off"/>
+        </form>
         <nav class="mobile-menu-links" aria-label="Mobile">
           ${NAV_LINKS.map((l) => `<a href="${l.href}">${l.label}</a>`).join("")}
+          <a href="compare.html">Compare</a>
           <a href="wishlist.html">Wishlist</a>
+          <a href="account.html">My account</a>
           <a href="cart.html">Cart</a>
         </nav>
         <div class="mobile-menu-section">
@@ -752,6 +758,13 @@ function renderLayout() {
             <a href="shipping.html">Shipping</a>
             <a href="returns.html">Returns</a>
           </nav>
+        </div>
+        <div class="mobile-menu-section">
+          <h4>Theme</h4>
+          <button class="btn btn-outline btn-sm btn-block" data-action="toggle-theme" style="margin-top:8px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            Toggle light / dark
+          </button>
         </div>
         <div class="mobile-menu-section">
           <h4>Currency</h4>
