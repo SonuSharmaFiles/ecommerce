@@ -264,26 +264,29 @@
     "badges": ["featured"]
   },
   {
-    "id": "kids-smart-watch",
-    "title": "Kids Smart Watch",
+    "id": "smart-sleep-ring",
+    "title": "Smart Sleep Ring",
     "brand": "Pulse",
     "category": "Wearables",
-    "price": 89,
-    "compare_at": null,
-    "rating": 4.4,
-    "ratings_count": 47,
-    "image": "https://images.unsplash.com/photo-1551193430-31cf41ad7af2?w=800&q=80",
+    "price": 179,
+    "compare_at": 229,
+    "rating": 4.6,
+    "ratings_count": 187,
+    "image": "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=800&q=80",
     "images": [
-      "https://images.unsplash.com/photo-1551193430-31cf41ad7af2?w=1200&q=80"
+      "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=1200&q=80",
+      "https://images.unsplash.com/photo-1635170794230-d44a2fbe07b0?w=1200&q=80"
     ],
-    "short": "GPS tracker, two-way calling, and educational games.",
-    "description": "Peace of mind for parents and fun for kids. Parental controls in the companion app.",
+    "short": "Track sleep, heart rate, and recovery from a single titanium ring.",
+    "description": "All-day biometrics from your finger. Sleep stages, heart-rate variability, blood oxygen, body temperature, and a personalized readiness score every morning. 7-day battery, swimproof, and discreet enough to wear with anything.",
     "specs": [
-      { "name": "Battery", "value": "3 days" },
-      { "name": "GPS", "value": "Built-in" },
-      { "name": "Camera", "value": "2MP" }
+      { "name": "Battery", "value": "7 days" },
+      { "name": "Material", "value": "Aircraft-grade titanium" },
+      { "name": "Sensors", "value": "PPG, temperature, accelerometer" },
+      { "name": "Water resistance", "value": "100m / 10 ATM" },
+      { "name": "App", "value": "iOS + Android" }
     ],
-    "in_stock": false,
-    "badges": ["new"]
+    "in_stock": true,
+    "badges": ["new", "best_seller"]
   }
 ]
