@@ -351,6 +351,16 @@ function getInitials(name) {
   return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "U";
 }
 
+// ---- Effective stats: combine baseline (products.json) with user reviews ----
+function effectiveStats(p) {
+  const userReviews = Reviews.list(p.id);
+  const userSum = userReviews.reduce((s, r) => s + r.rating, 0);
+  const totalCount = (p.ratings_count || 0) + userReviews.length;
+  const totalSum = (p.rating || 0) * (p.ratings_count || 0) + userSum;
+  const rating = totalCount > 0 ? totalSum / totalCount : (p.rating || 0);
+  return { rating, count: totalCount, userCount: userReviews.length };
+}
+
 // ---- Product card HTML ----
 function productCardHTML(p) {
   const disc = discountPercent(p);
@@ -361,9 +371,10 @@ function productCardHTML(p) {
   if (!p.in_stock) badges.push(`<span class="badge">Out of stock</span>`);
 
   const inWishlist = Wishlist.has(p.id);
+  const stats = effectiveStats(p);
 
   return `
-    <article class="product-card">
+    <article class="product-card" data-product-card="${p.id}">
       <a href="product.html?id=${p.id}" class="product-media">
         <img src="${productImage(p)}" alt="${escapeHtml(p.title)}" loading="lazy" />
         <div class="product-badges">${badges.join("")}</div>
@@ -374,7 +385,10 @@ function productCardHTML(p) {
       <div class="product-body">
         <div class="product-meta">${escapeHtml(p.brand)} · ${escapeHtml(p.category)}</div>
         <a href="product.html?id=${p.id}" class="product-title">${escapeHtml(p.title)}</a>
-        <div class="product-rating">${ratingStars(p.rating)} <span>${p.rating.toFixed(1)} (${p.ratings_count})</span></div>
+        <div class="product-rating" data-rating-row="${p.id}" data-baseline-rating="${p.rating}" data-baseline-count="${p.ratings_count}">
+          <span data-rating-stars>${ratingStars(stats.rating)}</span>
+          <span><span data-rating-value>${stats.rating.toFixed(1)}</span> (<span data-rating-count>${stats.count}</span>)</span>
+        </div>
         <div class="product-bottom">
           <div>
             <span class="price-now">${formatPrice(p.price)}</span>
@@ -389,6 +403,38 @@ function productCardHTML(p) {
     </article>
   `;
 }
+
+// ---- When reviews change, update every visible count/rating for that product ----
+function refreshProductStats(productId) {
+  document.querySelectorAll(`[data-rating-row="${productId}"]`).forEach((row) => {
+    const baseRating = Number(row.dataset.baselineRating) || 0;
+    const baseCount = Number(row.dataset.baselineCount) || 0;
+    const userReviews = Reviews.list(productId);
+    const userSum = userReviews.reduce((s, r) => s + r.rating, 0);
+    const totalCount = baseCount + userReviews.length;
+    const totalSum = baseRating * baseCount + userSum;
+    const rating = totalCount > 0 ? totalSum / totalCount : baseRating;
+
+    const starsEl = row.querySelector("[data-rating-stars]");
+    const valueEl = row.querySelector("[data-rating-value]");
+    const countEl = row.querySelector("[data-rating-count]");
+    if (starsEl) starsEl.innerHTML = ratingStars(rating, starsEl.dataset.size ? Number(starsEl.dataset.size) : 12);
+    if (valueEl) valueEl.textContent = rating.toFixed(1);
+    if (countEl) countEl.textContent = String(totalCount);
+  });
+
+  // Plain count-only badges (e.g. tab labels)
+  document.querySelectorAll(`[data-review-count-for="${productId}"]`).forEach((el) => {
+    const baseCount = Number(el.dataset.baselineCount) || 0;
+    const total = baseCount + Reviews.list(productId).length;
+    const label = el.dataset.label || "review";
+    el.textContent = `${total} ${label}${total === 1 ? "" : "s"}`;
+  });
+}
+
+document.addEventListener("reviews:changed", (e) => {
+  if (e.detail) refreshProductStats(e.detail);
+});
 
 /* ===================================================================
    Layout: shared header + footer + drawers, injected into every page.

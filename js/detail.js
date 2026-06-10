@@ -25,31 +25,38 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.title = `${p.title} — ShopFlow`;
   Recent.add(p.id);
 
-  // Add JSON-LD Product schema for SEO
-  const ld = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: p.title,
-    description: p.description || p.short,
-    image: (p.images && p.images[0]) || p.image,
-    brand: { "@type": "Brand", name: p.brand },
-    sku: p.id,
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: p.rating,
-      reviewCount: p.ratings_count,
-    },
-    offers: {
-      "@type": "Offer",
-      priceCurrency: "USD",
-      price: p.price,
-      availability: p.in_stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-    },
-  };
-  const script = document.createElement("script");
-  script.type = "application/ld+json";
-  script.textContent = JSON.stringify(ld);
-  document.head.appendChild(script);
+  // Add JSON-LD Product schema for SEO (uses effective stats incl. user reviews)
+  const initialStats = effectiveStats(p);
+  const ldScript = document.createElement("script");
+  ldScript.type = "application/ld+json";
+  function renderLd() {
+    const stats = effectiveStats(p);
+    ldScript.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: p.title,
+      description: p.description || p.short,
+      image: (p.images && p.images[0]) || p.image,
+      brand: { "@type": "Brand", name: p.brand },
+      sku: p.id,
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: Number(stats.rating.toFixed(2)),
+        reviewCount: stats.count,
+      },
+      offers: {
+        "@type": "Offer",
+        priceCurrency: "USD",
+        price: p.price,
+        availability: p.in_stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      },
+    });
+  }
+  renderLd();
+  document.head.appendChild(ldScript);
+  document.addEventListener("reviews:changed", (e) => {
+    if (e.detail === p.id) renderLd();
+  });
 
   const disc = discountPercent(p);
   const inWishlist = Wishlist.has(p.id);
@@ -81,9 +88,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     <div class="detail-info">
       <div class="product-meta">${escapeHtml(p.brand)} · ${escapeHtml(p.category)}</div>
       <h1>${escapeHtml(p.title)}</h1>
-      <div class="detail-rating">
-        ${ratingStars(p.rating, 16)}
-        <span>${p.rating.toFixed(1)} · <a href="#reviews" class="link">${p.ratings_count} reviews</a></span>
+      <div class="detail-rating" data-rating-row="${p.id}" data-baseline-rating="${p.rating}" data-baseline-count="${p.ratings_count}">
+        <span data-rating-stars data-size="16">${ratingStars(initialStats.rating, 16)}</span>
+        <span>
+          <span data-rating-value>${initialStats.rating.toFixed(1)}</span>
+          ·
+          <a href="#reviews" class="link"><span data-rating-count>${initialStats.count}</span> reviews</a>
+        </span>
       </div>
       <div class="detail-price">
         <span id="detail-price-now">${formatPrice(p.price)}</span>
@@ -139,7 +150,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       <div class="tab-buttons">
         <button class="tab-button active" data-tab="desc">Description</button>
         <button class="tab-button" data-tab="specs">Specifications</button>
-        <button class="tab-button" data-tab="reviews-tab">Reviews</button>
+        <button class="tab-button" data-tab="reviews-tab">
+          Reviews (<span data-review-count-for="${p.id}" data-baseline-count="${p.ratings_count}">${initialStats.count}</span>)
+        </button>
         <button class="tab-button" data-tab="shipping">Shipping</button>
       </div>
       <div class="tab-panel active" data-panel="desc">
@@ -294,23 +307,27 @@ function renderReviewsPanel(p) {
     ...samples.map((s) => ({ ...s, source: "sample" })),
   ];
 
-  // Aggregate stats — including the user-submitted ones
-  const ratings = all.map((r) => r.rating);
-  const avg = ratings.length ? ratings.reduce((s, r) => s + r, 0) / ratings.length : p.rating;
-  const dist = [0, 0, 0, 0, 0];
-  all.forEach((r) => dist[r.rating - 1]++);
+  // Effective stats include the full baseline + user-submitted reviews
+  const stats = effectiveStats(p);
+  const baselineCount = p.ratings_count || 0;
+
+  // Distribution: scale the baseline rating distribution proportionally,
+  // then add the actual user-submitted ratings on top so they show up.
+  const dist = baselineRatingDistribution(p);
+  userReviews.forEach((r) => { dist[r.rating - 1]++; });
+  const distTotal = dist.reduce((s, n) => s + n, 0) || 1;
 
   panel.innerHTML = `
     <div class="reviews-summary">
       <div>
-        <div class="avg-rating">${avg.toFixed(1)}</div>
-        <div class="avg-stars">${ratingStars(avg, 16)}</div>
-        <div class="text-muted" style="font-size:13px">${all.length} review${all.length === 1 ? "" : "s"}</div>
+        <div class="avg-rating">${stats.rating.toFixed(1)}</div>
+        <div class="avg-stars">${ratingStars(stats.rating, 16)}</div>
+        <div class="text-muted" style="font-size:13px">${stats.count} review${stats.count === 1 ? "" : "s"}</div>
       </div>
       <div class="review-bars">
         ${[5,4,3,2,1].map((r) => {
           const count = dist[r-1];
-          const pct = all.length ? (count / all.length) * 100 : 0;
+          const pct = (count / distTotal) * 100;
           return `<div class="review-bar">
             <span>${r}★</span>
             <div class="bar"><span style="width:${pct}%"></span></div>
@@ -321,7 +338,7 @@ function renderReviewsPanel(p) {
     </div>
 
     <div class="reviews-toolbar">
-      <strong>${all.length} review${all.length === 1 ? "" : "s"}</strong>
+      <strong>${stats.count} review${stats.count === 1 ? "" : "s"}</strong>
       <button class="btn btn-primary btn-sm" id="open-review-form">Write a review</button>
     </div>
 
@@ -332,7 +349,7 @@ function renderReviewsPanel(p) {
     </div>
 
     <p class="text-muted" style="font-size:12px;margin-top:16px">
-      💡 Your reviews are saved in this browser. To make them visible to all visitors, add a backend (Firebase / Supabase) — ask in chat to wire it up.
+      Reviews you write are saved on this device.
     </p>
   `;
 
@@ -522,6 +539,30 @@ function openReviewForm(product, editId) {
       toast("Could not save — your browser storage may be full. Try removing the photo.");
     }
   });
+}
+
+// Derive a 5-bucket rating distribution from the product's average + count.
+// Real ecommerce stars: skew toward the average and 5★. Returns array of 5
+// numbers (counts for 1★, 2★, 3★, 4★, 5★) summing to p.ratings_count.
+function baselineRatingDistribution(p) {
+  const total = p.ratings_count || 0;
+  if (total === 0) return [0, 0, 0, 0, 0];
+  const avg = p.rating || 4.5;
+  // Weight function: higher weight closer to the average, with a 5★ skew.
+  const weights = [1, 2, 3, 4, 5].map((r) => {
+    const distance = Math.abs(r - avg);
+    const w = Math.exp(-distance * distance / 0.6); // gaussian-ish
+    return r === 5 ? w * 1.4 : w;
+  });
+  const sumW = weights.reduce((s, w) => s + w, 0);
+  let remaining = total;
+  const result = weights.map((w, i, arr) => {
+    if (i === arr.length - 1) return remaining;
+    const n = Math.round((w / sumW) * total);
+    remaining -= n;
+    return n;
+  });
+  return result;
 }
 
 function sampleReviewsFor(p) {
